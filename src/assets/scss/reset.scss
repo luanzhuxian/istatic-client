@@ -1,0 +1,126 @@
+body {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  color: #333;
+  font-size: 14px;
+  background-color: rgba(245,246,247,1);
+  height: 100%;
+}
+iframe, header, body, h1, h2, h3, h4, h5, i, h6, hr, p, span, a, blockquote, div, table, dl, dt, dd, ul, ol, li, pre, form, fieldset, legend, button, input, textarea, th, td, iframe, label, svg, path, defs {
+  margin: 0;
+  padding: 0;
+  font-family: "Microsoft YaHei", Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+  box-sizing: border-box;
+  word-break: break-all;
+  //scroll-behavior: smooth;
+  &::-webkit-scrollbar {
+    width: 8px;
+    &:horizontal {
+      height: 8px;
+    }
+  }
+  button {
+    cursor: pointer;
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+  // 两端按钮
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
+  // 外层轨道
+  &::-webkit-scrollbar-track {
+    display: none;
+  }
+  // 内层轨道
+  &::-webkit-scrollbar-track-piece {
+    display: none;
+  }
+    // 滚动的部分
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+    &:hover {
+      background-color: #bbb;
+    }
+  }
+  &::-webkit-resizer {
+    display: none;
+  }
+  &:before, &:after {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+  }
+}
+iframe {
+  border: none;
+}
+::selection {
+  background-color: #fe7b21;
+  color: #fff;
+}
+label {
+  font-weight: normal;
+}
+
+html {
+  box-sizing: border-box;
+  height: 100%;
+}
+#app {
+  height: 100%;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  outline: none;
+  text-decoration: none;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0;
+  /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+div:focus {
+  outline: none;
+}
+
+a:focus,
+a:active {
+  outline: none;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+ul, ol, p {
+  padding: 0;
+  margin: 0;
+  li {
+    list-style: none;
+  }
+}
+img {
+  object-fit: cover;
+}
+.router-guard {
+  h3 {
+    padding: 20px 0;
+    font-size: 24px;
+    color: #333333
+  }
+}

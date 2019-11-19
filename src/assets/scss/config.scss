@@ -1,0 +1,19 @@
+$--color-primary-orange: #fe7b21;
+$--color-primary-blue: #598BF8;
+$--border-color: #e7e7e7;
+$padding: 20px;
+// 文本溢出隐藏并显示省略号
+@mixin elps {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+//文本溢出隐藏并显示省略号多行
+@mixin elps-wrap($line) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box; //-webkit-box为旧的属性值，2012年最新的标准草案为flex，如果把值该为flex，将不支持多行省略号。
+  -webkit-line-clamp: $line; //webkit支持此属性，并且是一个不规范的属性，没有出现在css规范的草案中。必须结合display: -webkit-box和-webkit-box-orient: vertical;属性一起使用
+  -webkit-box-orient: vertical;
+}

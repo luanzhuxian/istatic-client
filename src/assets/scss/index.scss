@@ -1,0 +1,18 @@
+@import './reset.scss';
+@import './common.scss';
+//main-container全局样式
+.app-main {
+  min-height: 100%
+}
+
+.app-container {
+  padding: 20px;
+}
+button {
+  outline: none!important;
+}
+i {
+  font-style: normal;
+}
+
+
