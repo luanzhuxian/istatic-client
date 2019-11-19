@@ -3,7 +3,7 @@ import { Message } from 'element-ui'
 const fetch = new Fetch({
   timeout: 15000,
   headers: {
-    'Content-type': 'application/json'
+    'Content-Type': 'application/json'
   }
 })
 fetch.interceptors.request = (url, config) => {
@@ -12,7 +12,6 @@ fetch.interceptors.request = (url, config) => {
 fetch.interceptors.response = async resPromise => {
   try {
     let res = await resPromise
-    console.log(res)
     if (res.status === 500) {
       throw new Error('服务器正在开小差~')
     }

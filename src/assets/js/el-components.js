@@ -2,7 +2,6 @@
 /* eslint-disable */
 import Vue from 'vue'
 import ElementUI from 'element-ui'
-import '../scss/element-variables.scss'
 Vue.use(ElementUI)
 const {
   Loading,

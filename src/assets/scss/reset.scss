@@ -4,7 +4,7 @@ body {
   text-rendering: optimizeLegibility;
   color: #333;
   font-size: 14px;
-  background-color: rgba(245,246,247,1);
+  background-color: #fff;
   height: 100%;
 }
 iframe, header, body, h1, h2, h3, h4, h5, i, h6, hr, p, span, a, blockquote, div, table, dl, dt, dd, ul, ol, li, pre, form, fieldset, legend, button, input, textarea, th, td, iframe, label, svg, path, defs {
@@ -21,6 +21,8 @@ iframe, header, body, h1, h2, h3, h4, h5, i, h6, hr, p, span, a, blockquote, div
     }
   }
   button {
+    background: none;
+    border: none;
     cursor: pointer;
     &:disabled {
       cursor: not-allowed;

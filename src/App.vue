@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <Header />
     <keep-alive>
       <router-view/>
     </keep-alive>
@@ -7,15 +8,17 @@
 </template>
 
 <script>
-import fetch from './assets/js/fetch-config'
+import Header from './components/Header.vue'
 export default {
-  async mounted () {
-    try {
-      let res = await fetch.get('/api/demo')
-      console.log(res, 15)
-    } catch (e) {
-      throw e
+  components: {
+    Header
+  },
+  data () {
+    return {
+      recycleBin: false
     }
+  },
+  async mounted () {
   }
 }
 </script>

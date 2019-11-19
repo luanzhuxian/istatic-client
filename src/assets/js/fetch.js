@@ -31,22 +31,27 @@ export default class Fetch {
     return this[request](url, null, config)
   }
   async post (url, body, config = {}) {
+    body = body || {}
     config.method = 'POST'
     return this[request](url, body, config)
   }
   async put (url, body, config = {}) {
+    body = body || {}
     config.method = 'PUT'
     return this[request](url, body, config)
   }
   async delete (url, body, config = {}) {
+    body = body || {}
     config.method = 'DELETE'
     return this[request](url, body, config)
   }
   async update (url, body, config = {}) {
+    body = body || {}
     config.method = 'UPDATE'
     return this[request](url, body, config)
   }
-  async [request] (url, body = {}, config = {}) {
+  // 请求对象
+  async [request] (url, body, config = {}) {
     // 配置请求拦截器
     if (this.interceptors.request) {
       config = this.interceptors.request(url, config)
@@ -55,11 +60,20 @@ export default class Fetch {
       url += `?${qs.stringify(config.params)}`
       delete config.params
     }
+
+    // 处理body
     if (body) {
       config.body = JSON.stringify(body)
     }
+    // 将body改为formData
+    if (config.type === 'FormData') {
+      let b = new FormData()
+      for (let [k, v] of Object.entries(body)) {
+        b.append(k, v)
+      }
+      config.body = b
+    }
     const req = this[CreateRequest](url, config)
-
     try {
       let res
       if (this.interceptors.response) {
@@ -89,14 +103,20 @@ export default class Fetch {
    * @return {Request}
    */
   [CreateRequest] (url, config = {}) {
-    Object.assign(config.headers || {}, this.defaultConfig.headers)
+    let currentHeader = config.headers || {}
+    let defaultHeader = this.defaultConfig.headers
+    Object.assign(config, this.defaultConfig)
+    Object.assign(config.headers, currentHeader, defaultHeader)
+    if (config.type === 'FormData') {
+      // formData类型不需要传Content-Type
+      delete config.headers['Content-Type']
+    }
     // 生成Headers对象
     const headers = this[CreateHeaders](config.headers)
     // 用来终止请求的对象
     const controller = new AbortController()
     config.signal = controller.signal
     // 替换config中的headers对象为新构建的header对象
-    Object.assign(config, this.defaultConfig)
     config.headers = headers
     url = config.baseURI + url
     delete config.baseURI
