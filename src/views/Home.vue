@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    123
+    <h1>还没开发</h1>
   </div>
 </template>
 

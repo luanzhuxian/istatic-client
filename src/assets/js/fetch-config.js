@@ -1,5 +1,6 @@
 import Fetch from './fetch'
-import { Message } from 'element-ui'
+import { Message, Loading } from 'element-ui'
+let loadingInstance = null
 const fetch = new Fetch({
   timeout: 15000,
   headers: {
@@ -7,6 +8,7 @@ const fetch = new Fetch({
   }
 })
 fetch.interceptors.request = (url, config) => {
+  loadingInstance = Loading.service({ text: '拼命加载中...', background: 'transparent' })
   return config
 }
 fetch.interceptors.response = async resPromise => {
@@ -22,6 +24,8 @@ fetch.interceptors.response = async resPromise => {
   } catch (e) {
     Message.error(e.message)
     throw e
+  } finally {
+    loadingInstance.close()
   }
 }
 

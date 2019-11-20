@@ -38,9 +38,9 @@
           round
           type="primary"
           plain
-          icon="el-icon-link"
+          @click="see = !see"
         >
-          生成在线链接
+          {{ see ? '收起在线链接' : '查看在线链接' }}
         </el-button>
         <el-button
           round
@@ -59,6 +59,21 @@
         >
           回收站
         </el-checkbox>
+      </div>
+
+      <div v-show="see">
+        <div :class="$style.tip" v-if="changed" @click="createLink">
+          <i class="el-icon-warning-outline" />
+          下方新 icon 来袭，点击更新代码
+        </div>
+        <code
+          :class="{
+            [$style.link]: true,
+            [$style.disabled]: changed
+          }"
+          v-if="link"
+          v-text="link"
+        />
       </div>
 
       <ul
@@ -106,6 +121,10 @@ import {
   getProjects
 } from '../apis/project'
 import {
+  getLink,
+  createLink
+} from '../apis/link'
+import {
   getIcons,
   upload,
   remove,
@@ -119,6 +138,9 @@ export default {
       icons: [],
       currentProjectId: '',
       recycleBin: false,
+      see: true,
+      changed: false,
+      link: '',
       iconsForm: {
         visible: 1,
         projectId: ''
@@ -134,6 +156,7 @@ export default {
     try {
       await this.getProjects()
       await this.getIcons()
+      await this.getLink()
     } catch (e) {
       throw e
     }
@@ -152,7 +175,25 @@ export default {
     async getIcons () {
       try {
         let { result } = await getIcons(this.iconsForm)
-        this.icons = result
+        this.icons = result.list
+        this.changed = result.changed
+      } catch (e) {
+        throw e
+      }
+    },
+    async getLink () {
+      try {
+        let { result } = await getLink(this.currentProjectId)
+        this.link = result.link
+      } catch (e) {
+        throw e
+      }
+    },
+    async createLink () {
+      try {
+        await createLink(this.currentProjectId)
+        await this.getLink()
+        this.getIcons()
       } catch (e) {
         throw e
       }
@@ -160,7 +201,10 @@ export default {
     changeProject (pro) {
       this.currentProjectId = pro.id
       this.iconsForm.projectId = pro.id
+      this.recycleBin = false
+      this.iconsForm.visible = 1
       this.getIcons()
+      this.getLink()
     },
     upload () {
       this.$refs.fileSelect.click()
@@ -172,7 +216,7 @@ export default {
         willUpload.push(upload({
           projectId: this.currentProjectId,
           file: svg,
-          id: this.isReUploadId ? this.isReUploadId : null
+          id: this.isReUploadId ? this.isReUploadId : ''
         }))
       }
       try {
@@ -213,11 +257,11 @@ export default {
         if (!item.visible) {
           // 真删
           await remove(item.id)
+          await this.getIcons()
         } else {
           // 假删
           await this.updateIcons(item, { visible: 0 })
         }
-        await this.getIcons()
       } catch (e) {
         throw e
       }
@@ -240,12 +284,13 @@ export default {
 <style module lang="scss">
   .icons {
     display: flex;
+    justify-content: flex-start;
     padding: 30px 300px;
   }
   .project {
-    width: 150px;
   }
   .myProject {
+    width: 160px;
     padding-right: 20px;
     border-right: 1px solid #e7e7e7;
     > .proTitle {
@@ -411,5 +456,28 @@ export default {
     line-height: 16px;
     text-align: center;
     @include elps();
+  }
+  .tip {
+    margin-top: 20px;
+    color: red;
+    font-size: 12px;
+    cursor: pointer;
+    > i {
+      font-size: 14px;
+    }
+  }
+  .link {
+    display: block;
+    margin-top: 20px;
+    padding: 0 10px;
+    font-size: 12px;
+    line-height: 40px;
+    color: #666;
+    background-color: #efefef;
+    border-radius: 3px;
+    &.disabled {
+      user-select: none;
+      color: #ccc;
+    }
   }
 </style>
