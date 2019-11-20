@@ -16,7 +16,7 @@ module.exports = {
   pages: {
     index: {
       entry: 'src/main.js',
-      template: 'public/index.html',
+      template: process.env.NODE_ENV === 'production' ? 'public/index.html' : 'public/local.html',
       filename: 'index.html'
     }
   },
