@@ -22,7 +22,7 @@ module.exports = {
   },
 
   publicPath: '/',
-  outputDir: 'pl-icon',
+  outputDir: 'dist',
   assetsDir: 'static',
 
   devServer: {
