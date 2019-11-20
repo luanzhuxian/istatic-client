@@ -77,8 +77,8 @@
               <el-tooltip class="item" effect="dark" content="删除" placement="top">
                 <i class="el-icon-delete" @click="remove(item)" />
               </el-tooltip>
-              <el-tooltip class="item" effect="dark" content="重新上传" placement="top">
-                <i class="el-icon-upload2" />
+              <el-tooltip v-if="item.visible" class="item" effect="dark" content="重新上传" placement="top">
+                <i class="el-icon-upload2" @click="reUpload(item)" />
               </el-tooltip>
               <el-tooltip v-if="!item.visible" class="item" effect="dark" content="还原" placement="left-start">
                 <i class="el-icon-refresh-left" @click="updateIcons(item, { visible: 1 })" />
@@ -170,12 +170,14 @@ export default {
       const willUpload = []
       for (let svg of files) {
         willUpload.push(upload({
-          projectId: this.currentProject.id,
-          file: svg
+          projectId: this.currentProjectId,
+          file: svg,
+          id: this.isReUploadId ? this.isReUploadId : null
         }))
       }
       try {
         await Promise.all(willUpload)
+        this.isReUploadId = ''
         await this.getIcons()
       } catch (e) {
         throw e
@@ -193,6 +195,13 @@ export default {
       } catch (e) {
         throw e
       }
+    },
+    /**
+     * 重新上传
+     */
+    reUpload (item) {
+      this.upload()
+      this.isReUploadId = item.id
     },
     async remove (item) {
       try {
