@@ -3,7 +3,7 @@
     <div :class="$style.project">
       <div :class="$style.myProject">
         <div :class="$style.proTitle">
-          <i class="el-icon-edit" :class="$style.edit" />
+          <i class="el-icon-circle-plus-outline" :class="$style.edit" @click="addProject" />
           我的项目
         </div>
 
@@ -14,9 +14,13 @@
             :key="i"
             @click="changeProject(item)"
           >
-            <span>
-              {{ item.project_name }}
-            </span>
+            <div>
+              {{ item.name }}
+            </div>
+            <div>
+              <i @click.stop="editPro(item)" class="el-icon-edit"></i>
+              <i @click.stop="delPro(item)" class="el-icon-delete"></i>
+            </div>
           </li>
         </ul>
       </div>
@@ -24,11 +28,11 @@
 
     <div :class="$style.iconsManage">
       <div :class="$style.proInfo">
-        <div :class="$style.proName" v-text="currentProject.project_name" />
+        <div :class="$style.proName" v-if="currentProject.project_name" v-text="currentProject.project_name" />
         <div :class="$style.iconCount">
           <i v-text="icons.length" /> 个图标
         </div>
-        <div :class="$style.updateTime">
+        <div :class="$style.updateTime" v-if="currentProject.update_time" >
           <i class="el-icon-time" /> <span v-text="currentProject.update_time" />
         </div>
       </div>
@@ -118,7 +122,10 @@
 </template>
 <script>
 import {
-  getProjects
+  getProjects,
+  createProject,
+  removeProject,
+  updateProject
 } from '../apis/project'
 import {
   getLink,
@@ -154,19 +161,26 @@ export default {
   },
   async activated () {
     try {
-      await this.getProjects()
-      await this.getIcons()
-      await this.getLink()
+      await this.init()
     } catch (e) {
       throw e
     }
   },
   methods: {
+    async init () {
+      try {
+        await this.getProjects()
+        await this.getIcons()
+        await this.getLink()
+      } catch (e) {
+        throw e
+      }
+    },
     async getProjects () {
       try {
         let { result } = await getProjects()
         this.projects = result
-        this.currentProjectId = result[0] ? result[0].id : ''
+        this.currentProjectId = this.currentProjectId ? this.currentProjectId : result[0] ? result[0].id : ''
         this.iconsForm.projectId = this.currentProjectId
       } catch (e) {
         throw e
@@ -184,7 +198,7 @@ export default {
     async getLink () {
       try {
         let { result } = await getLink(this.currentProjectId)
-        this.link = result.link
+        this.link = result ? result.link : ''
       } catch (e) {
         throw e
       }
@@ -193,7 +207,58 @@ export default {
       try {
         await createLink(this.currentProjectId)
         await this.getLink()
-        this.getIcons()
+        await this.getIcons()
+      } catch (e) {
+        throw e
+      }
+    },
+    async delPro (item) {
+      try {
+        await this.$confirm({
+          message: '确定删除？',
+          type: 'warning'
+        })
+        await removeProject(item.id)
+        let index = this.projects.findIndex(pro => pro.id === item.id)
+        this.projects.splice(index, 1)
+        if (this.currentProjectId === item.id) {
+          this.currentProjectId = this.projects[0] ? this.projects[0].id : ''
+        }
+        await this.getIcons()
+        await this.getLink()
+      } catch (e) {
+        throw e
+      }
+    },
+    async editPro (item) {
+      try {
+        const { value } = await this.$prompt({
+          title: '请输入项目名称',
+          inputValue: item.name
+        })
+        item.name = value
+      } catch (e) {
+        return
+      }
+      try {
+        await updateProject(item.id, { name: item.name })
+        let index = this.projects.findIndex(pro => pro.id === item.id)
+        this.projects.splice(index, 1, item)
+      } catch (e) {
+        throw e
+      }
+    },
+    async addProject () {
+      let val = ''
+      try {
+        const { value } = await this.$prompt('请输入项目名称')
+        val = value
+      } catch (e) {
+        return
+      }
+      try {
+        await createProject({ name: val })
+        await this.init()
       } catch (e) {
         throw e
       }
@@ -308,12 +373,20 @@ export default {
   .projectList {
     > li {
       position: relative;
+      display: flex;
+      justify-content: space-between;
       padding: 10px 0 10px 10px;
       color: #999;
       font-size: 12px;
       cursor: pointer;
-      > span {
+      > div {
         line-height: 16px;
+        > i {
+          margin-left: 5px;
+          &:hover {
+            color: #fe7b21;
+          }
+        }
       }
       &.active {
         color: #333;

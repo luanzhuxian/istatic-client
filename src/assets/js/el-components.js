@@ -74,7 +74,7 @@ Vue.prototype.$prompt = async (config = {}) => {
     Object.assign(configDefault, config)
   }
   try {
-    await MessageBox(configDefault)
+    return MessageBox(configDefault)
   } catch (e) {
     throw e
   }
