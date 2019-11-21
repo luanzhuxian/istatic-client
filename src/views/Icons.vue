@@ -211,20 +211,18 @@ export default {
     },
     async fileChange (e) {
       const files = e.target.files
-      const willUpload = []
       for (let svg of files) {
-        willUpload.push(upload({
-          projectId: this.currentProjectId,
-          file: svg,
-          id: this.isReUploadId ? this.isReUploadId : ''
-        }))
-      }
-      try {
-        await Promise.all(willUpload)
-        this.isReUploadId = ''
-        await this.getIcons()
-      } catch (e) {
-        throw e
+        try {
+          await upload({
+            projectId: this.currentProjectId,
+            file: svg,
+            id: this.isReUploadId ? this.isReUploadId : ''
+          })
+          this.isReUploadId = ''
+          await this.getIcons()
+        } catch (e) {
+          this.$error(e.message)
+        }
       }
     },
     /**
