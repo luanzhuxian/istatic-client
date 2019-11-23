@@ -39,7 +39,7 @@ module.exports = {
       // 测试37 开发34 王恩74 李宾哲132 赵伟116 牛昌昌92 张涛77
       '/api': {
         target: 'http://127.0.0.1:7001'
-        // target: 'http://admall.youpenglai.com'
+        // target: 'http://192.168.130.33:7001'
       }
     }
   },

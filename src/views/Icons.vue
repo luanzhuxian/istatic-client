@@ -52,6 +52,7 @@
           plain
           icon="el-icon-upload2"
           @click="upload"
+          :disabled="projects.length === 0"
         >
           上传图标至项目
         </el-button>
@@ -60,6 +61,7 @@
           :class="$style.recycleBin"
           v-model="recycleBin"
           @change="changeRecycle"
+          :disabled="projects.length === 0"
         >
           回收站
         </el-checkbox>
@@ -276,19 +278,26 @@ export default {
     },
     async fileChange (e) {
       const files = e.target.files
-      for (let svg of files) {
-        try {
-          await upload({
-            projectId: this.currentProjectId,
-            file: svg,
-            id: this.isReUploadId ? this.isReUploadId : ''
-          })
-          this.isReUploadId = ''
-          await this.getIcons()
-        } catch (e) {
-          this.$error(e.message)
-        }
-      }
+      console.log(files)
+      await upload({
+        file1: files[0],
+        file2: files[1],
+        projectId: this.currentProjectId,
+        id: this.isReUploadId ? this.isReUploadId : ''
+      })
+      // for (let svg of files) {
+      //   try {
+      //     await upload({
+      //       projectId: this.currentProjectId,
+      //       file: svg,
+      //       id: this.isReUploadId ? this.isReUploadId : ''
+      //     })
+      //     this.isReUploadId = ''
+      //     await this.getIcons()
+      //   } catch (e) {
+      //     this.$error(e.message)
+      //   }
+      // }
     },
     /**
      * 修改图标
@@ -465,8 +474,8 @@ export default {
       height: 100px;
       padding: 20px 0;
       > svg {
-        height: 100%;
-        width: 100%;
+        width: 80px;
+        height: 80px;
       }
     }
     &:hover {
