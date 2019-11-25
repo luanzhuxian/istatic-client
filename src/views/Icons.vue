@@ -104,6 +104,9 @@
               <el-tooltip v-if="!item.visible" class="item" effect="dark" content="还原" placement="left-start">
                 <i class="el-icon-refresh-left" @click="updateIcons(item, { visible: 1 })" />
               </el-tooltip>
+              <el-tooltip class="item" effect="dark" content="预览" placement="left-start">
+                <i class="el-icon-refresh-left" @click="preview(item)" />
+              </el-tooltip>
             </div>
             <button @click="copyCode(item)">复制代码</button>
           </div>
@@ -120,6 +123,8 @@
       accept="image/svg+xml"
       @change="fileChange"
     >
+
+    <div @click="showSvgPreview = false" :class="$style.svgPreivew" v-show="showSvgPreview" v-html="previewSvg" />
   </div>
 </template>
 <script>
@@ -148,8 +153,10 @@ export default {
       currentProjectId: '',
       recycleBin: false,
       see: true,
+      showSvgPreview: false,
       changed: false,
       link: '',
+      previewSvg: '',
       iconsForm: {
         visible: 1,
         projectId: ''
@@ -277,27 +284,18 @@ export default {
       this.$refs.fileSelect.click()
     },
     async fileChange (e) {
-      const files = e.target.files
-      console.log(files)
-      await upload({
-        file1: files[0],
-        file2: files[1],
+      const files = Array.from(e.target.files)
+      const data = {
         projectId: this.currentProjectId,
         id: this.isReUploadId ? this.isReUploadId : ''
-      })
-      // for (let svg of files) {
-      //   try {
-      //     await upload({
-      //       projectId: this.currentProjectId,
-      //       file: svg,
-      //       id: this.isReUploadId ? this.isReUploadId : ''
-      //     })
-      //     this.isReUploadId = ''
-      //     await this.getIcons()
-      //   } catch (e) {
-      //     this.$error(e.message)
-      //   }
-      // }
+      }
+      console.log(files.entries())
+      for (let [i, file] of files.entries()) {
+        data[`file${i}`] = file
+      }
+      await upload(data)
+      this.isReUploadId = ''
+      await this.getIcons()
     },
     /**
      * 修改图标
@@ -311,6 +309,11 @@ export default {
       } catch (e) {
         throw e
       }
+    },
+    // 预览
+    preview (item) {
+      this.showSvgPreview = true
+      this.previewSvg = item.content
     },
     /**
      * 重新上传
@@ -464,8 +467,8 @@ export default {
     align-items: center;
     flex-direction: column;
     padding: 12px 8px;
-    background-color: #efefef;
     border-radius: 10px;
+    border: 1px solid #e7e7e7;
     > .svg {
       display: flex;
       align-items: center;
@@ -558,6 +561,22 @@ export default {
     &.disabled {
       user-select: none;
       color: #ccc;
+    }
+  }
+  .svgPreivew {
+    position: fixed;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, .8);
+    z-index: 1;
+    > svg {
+      width: 200px;
+      height: 200px;
     }
   }
 </style>

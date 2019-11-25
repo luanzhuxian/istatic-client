@@ -8,6 +8,16 @@ import fecth from '../assets/js/fetch-config'
  * @return {Promise<*>}
  */
 export const getIcons = (params) => fecth.get(`/api/icons`, { params })
+/**
+ * 上传图标
+ * @param data {object}
+ * @property data.projectId {string}
+ * @property data.ic {string} 修改图标时的图标id
+ * @property data.file1 文件（下同），必须后置
+ * @property data.file2
+ * ...
+ * @return {Promise<*>}
+ */
 export const upload = (data) => fecth.post('/api/icons', data, { type: 'FormData' })
 export const remove = (id) => fecth.delete(`/api/icons/${id}`)
 /**
