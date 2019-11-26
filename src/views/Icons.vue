@@ -469,6 +469,7 @@ export default {
     padding: 12px 8px;
     border-radius: 10px;
     border: 1px solid #e7e7e7;
+    background-color: #abc;
     > .svg {
       display: flex;
       align-items: center;
@@ -500,11 +501,12 @@ export default {
     background-color: rgba(0, 0, 0, .8);
     > div {
       display: grid;
-      grid-template-columns: repeat(2, 70px);
-      grid-template-rows: repeat(1, 70px);
+      grid-template-columns: repeat(2, 45px);
+      grid-template-rows: repeat(2, 45px);
+      justify-content: space-around;
       > i {
         display: inline-block;
-        line-height: 70px;
+        line-height: 45px;
         text-align: center;
         font-size: 20px;
         color: #ddd;
