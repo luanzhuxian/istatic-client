@@ -36,7 +36,7 @@
         </div>
       </div>
 
-      <div :class="$style.files">
+      <div :class="$style.files" v-if="files.length">
         <div :class="$style.file">
           <i />
           <span :class="$style.filename">文件名称</span>
