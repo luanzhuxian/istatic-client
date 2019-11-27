@@ -20,6 +20,12 @@
       >
         图标管理
       </el-menu-item>
+      <el-menu-item
+        :route="{ name: 'Images' }"
+        index="3"
+      >
+        文件管理
+      </el-menu-item>
     </el-menu>
 
     <div :class="$style.headerBg" />

@@ -18,6 +18,14 @@ const routes = [
     meta: {
       title: '我的图标'
     }
+  },
+  {
+    path: '/images',
+    name: 'Images',
+    component: () => import('../views/Image.vue'),
+    meta: {
+      title: '我的图片'
+    }
   }
 ]
 

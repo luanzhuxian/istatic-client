@@ -289,7 +289,6 @@ export default {
         projectId: this.currentProjectId,
         id: this.isReUploadId ? this.isReUploadId : ''
       }
-      console.log(files.entries())
       for (let [i, file] of files.entries()) {
         data[`file${i}`] = file
       }
