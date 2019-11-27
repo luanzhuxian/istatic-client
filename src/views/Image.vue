@@ -2,7 +2,8 @@
   <div :class="$style.image">
     <el-form inline size="mini">
       <el-form-item>
-        <el-button type="primary">上传文件</el-button>
+        <el-button @click="selectFile" type="primary">上传文件</el-button>
+        <input ref="input" v-show="false" type="file" multiple @change="fileChange">
       </el-form-item>
       <el-form-item>
         <el-button type="primary">新建目录</el-button>
@@ -67,8 +68,9 @@
 </template>
 
 <script>
+/* eslint-disable */
 import FilePreview from '../components/File-Preview.vue'
-import { getFiles } from '../apis/oss'
+import { getFiles, uploadFiles } from '../apis/oss'
 export default {
   name: 'Image',
   components: {
@@ -125,6 +127,22 @@ export default {
         .then(() => {
           this.$success('复制成功！')
         })
+    },
+    selectFile () {
+      this.$refs.input.click()
+    },
+    async fileChange (e) {
+      const files = Array.from(e.target.files)
+      const data = {}
+      for (let [i, file] of files.entries()) {
+        data[`file${i}`] = file
+      }
+      try {
+        await uploadFiles(this.dir, data)
+        await this.getFiles()
+      } catch (e) {
+        throw e
+      }
     }
   }
 }
