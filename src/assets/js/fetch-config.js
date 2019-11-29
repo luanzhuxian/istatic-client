@@ -14,13 +14,12 @@ fetch.interceptors.request = (url, config) => {
 fetch.interceptors.response = async resPromise => {
   try {
     let res = await resPromise
-    if (res.status === 500) {
-      throw new Error('服务器正在开小差~')
+    res = await res.json()
+    console.log(res)
+    if (res.status !== 200) {
+      throw new Error(res.message)
     }
-    if (res.status === 404) {
-      throw new Error('请求未找到~')
-    }
-    return res.json()
+    return res
   } catch (e) {
     Message.error(e.message)
     throw e

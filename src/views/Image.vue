@@ -6,7 +6,7 @@
         <input ref="input" v-show="false" type="file" multiple @change="fileChange">
       </el-form-item>
       <el-form-item>
-        <el-button type="primary">新建目录</el-button>
+        <el-button type="primary" @click="createDir">新建目录</el-button>
       </el-form-item>
     </el-form>
 
@@ -70,7 +70,7 @@
 <script>
 /* eslint-disable */
 import FilePreview from '../components/File-Preview.vue'
-import { getFiles, uploadFiles } from '../apis/oss'
+import { getFiles, uploadFiles, createDir } from '../apis/oss'
 export default {
   name: 'Image',
   components: {
@@ -142,6 +142,16 @@ export default {
         await this.getFiles()
       } catch (e) {
         throw e
+      }
+    },
+    async createDir () {
+      try {
+        const { value } = await this.$prompt('请输入目录名称')
+        await createDir(value)
+      } catch (e) {
+        if (e !== 'cancel') {
+          throw e
+        }
       }
     }
   }
