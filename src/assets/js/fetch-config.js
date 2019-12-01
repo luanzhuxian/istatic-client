@@ -15,7 +15,6 @@ fetch.interceptors.response = async resPromise => {
   try {
     let res = await resPromise
     res = await res.json()
-    console.log(res)
     if (res.status !== 200) {
       throw new Error(res.message)
     }
