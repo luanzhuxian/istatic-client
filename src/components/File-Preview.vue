@@ -146,7 +146,7 @@ export default {
     align-items: center;
     justify-content: center;
     padding: 10px;
-    height: 400px;
+    height: 460px;
     background-color: #e7e7e7;
     > img {
       object-fit: cover;
