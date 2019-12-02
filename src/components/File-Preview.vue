@@ -82,7 +82,7 @@ export default {
         img.style.height = '380px'
       } else {
         img.style.width = '440px'
-        img.style.height = 440 / r + 'auto'
+        img.style.height = 440 / r + 'px'
       }
     })
     this.$refs.img.addEventListener('error', (e) => {
