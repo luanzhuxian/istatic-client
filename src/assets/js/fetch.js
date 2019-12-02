@@ -36,7 +36,7 @@ export default class Fetch {
     return this[request](url, null, config)
   }
   async post (url, body, config = {}) {
-    body = body || {}
+    body = body || null
     config.method = 'POST'
     return this[request](url, body, config)
   }

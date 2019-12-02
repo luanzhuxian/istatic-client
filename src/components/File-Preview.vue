@@ -9,7 +9,7 @@
           </div>
           <div :class="$style.content">
             <div :class="$style.previewBox">
-              <img :src="data.url" alt="">
+              <img ref="img" :src="data.url" alt="">
             </div>
             <div :class="$style.detailInfo">
               <div :class="$style.field">
@@ -68,6 +68,24 @@ export default {
       }
     }
   },
+  mounted () {
+    this.$refs.img.addEventListener('load', function (e) {
+      let img = e.target
+      let w = img.width
+      let h = img.height
+      let r = w / h // 宽高比
+      if (h > w) {
+        img.style.width = 380 * r + 'px'
+        img.style.height = '380px'
+      } else {
+        img.style.width = '440px'
+        img.style.height = 440 / r + 'auto'
+      }
+    })
+    this.$refs.img.addEventListener('error', function (e) {
+      console.log(e)
+    })
+  },
   methods: {
     close () {
       this.$emit('update:show', false)
@@ -121,13 +139,13 @@ export default {
     padding: 20px;
   }
   .previewBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px;
     height: 400px;
-    text-align: center;
     background-color: #e7e7e7;
     > img {
-      height: 100%;
-      max-width: 100%;
       object-fit: cover;
     }
   }
