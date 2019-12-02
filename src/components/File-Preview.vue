@@ -9,7 +9,8 @@
           </div>
           <div :class="$style.content">
             <div :class="$style.previewBox">
-              <img ref="img" :src="data.url" alt="">
+              <img v-show="!error" ref="img" :src="data.url" alt="">
+              <span v-show="error">暂不支持预览</span>
             </div>
             <div :class="$style.detailInfo">
               <div :class="$style.field">
@@ -41,7 +42,8 @@ export default {
   data () {
     return {
       visibleContent: false,
-      visibleBox: false
+      visibleBox: false,
+      error: false
     }
   },
   props: {
@@ -69,7 +71,8 @@ export default {
     }
   },
   mounted () {
-    this.$refs.img.addEventListener('load', function (e) {
+    this.$refs.img.addEventListener('load', (e) => {
+      this.error = false
       let img = e.target
       let w = img.width
       let h = img.height
@@ -82,8 +85,8 @@ export default {
         img.style.height = 440 / r + 'auto'
       }
     })
-    this.$refs.img.addEventListener('error', function (e) {
-      console.log(e)
+    this.$refs.img.addEventListener('error', (e) => {
+      this.error = true
     })
   },
   methods: {
