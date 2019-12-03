@@ -12,9 +12,10 @@ const routes = [
     }
   },
   {
-    path: '/icons',
+    path: '/icons/:projectId',
     name: 'Icons',
     component: () => import('../views/Icons.vue'),
+    props: true,
     meta: {
       title: '我的图标'
     }

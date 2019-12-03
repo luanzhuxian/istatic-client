@@ -163,6 +163,12 @@ export default {
       }
     }
   },
+  props: {
+    projectId: {
+      type: String,
+      default: ''
+    }
+  },
   computed: {
     currentProject () {
       return this.projects.find(item => item.id === this.currentProjectId) || {}
@@ -179,8 +185,14 @@ export default {
     async init () {
       try {
         await this.getProjects()
-        await this.getIcons()
-        await this.getLink()
+        if (this.projectId) {
+          this.iconsForm.projectId = this.projectId
+          this.currentProjectId = this.projectId
+          await this.getIcons()
+          await this.getLink()
+        } else {
+          await this.$router.push({ name: 'Icons', params: { projectId: this.iconsForm.projectId } })
+        }
       } catch (e) {
         throw e
       }
@@ -272,13 +284,13 @@ export default {
         throw e
       }
     },
-    changeProject (pro) {
+    async changeProject (pro) {
+      if (this.currentProjectId === pro.id) return
       this.currentProjectId = pro.id
       this.iconsForm.projectId = pro.id
       this.recycleBin = false
       this.iconsForm.visible = 1
-      this.getIcons()
-      this.getLink()
+      await this.$router.push({ name: 'Icons', params: { projectId: pro.id } })
     },
     upload () {
       this.$refs.fileSelect.click()
@@ -352,6 +364,13 @@ export default {
       this.iconsForm.visible = val ? 0 : 1
       this.getIcons()
     }
+  },
+  async beforeRouteUpdate (to, from, next) {
+    await next()
+    this.currentProjectId = this.projectId
+    this.iconsForm.projectId = this.currentProjectId
+    this.getIcons()
+    this.getLink()
   }
 }
 </script>
