@@ -147,7 +147,8 @@ export default {
     async createDir () {
       try {
         const { value } = await this.$prompt('请输入目录名称')
-        await createDir(value)
+        await createDir(value, this.dir)
+        await this.getFiles()
       } catch (e) {
         if (e !== 'cancel') {
           throw e

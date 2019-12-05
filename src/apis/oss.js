@@ -14,6 +14,7 @@ export const uploadFiles = (dir, data) => fecth.post(`/api/file?dir=${dir}`, dat
 /**
  * 创建目录
  * @param dirname {string}
+ * @param path {string}
  * @return {Promise<*>}
  */
-export const createDir = (dirname) => fecth.post(`/api/create/dir/${dirname}`)
+export const createDir = (dirname, path) => fecth.post(`/api/create/dir/${dirname}?path=${path}`)
