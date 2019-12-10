@@ -105,7 +105,7 @@
                 <i class="el-icon-refresh-left" @click="updateIcons(item, { visible: 1 })" />
               </el-tooltip>
               <el-tooltip class="item" effect="dark" content="预览" placement="left-start">
-                <i class="el-icon-refresh-left" @click="preview(item)" />
+                <i class="el-icon-full-screen" @click="preview(item)" />
               </el-tooltip>
             </div>
             <button @click="copyCode(item)">复制代码</button>
@@ -592,7 +592,7 @@ export default {
     justify-content: center;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, .8);
+    background-color: rgba(170, 187, 204, .8);
     z-index: 1;
     > svg {
       width: 200px;
