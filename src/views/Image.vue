@@ -40,6 +40,7 @@
       <div :class="$style.files" v-if="files.length">
         <div :class="$style.file">
           <i />
+          <span />
           <span :class="$style.filename">文件名称</span>
           <span :class="$style.size">文件大小</span>
           <span :class="$style.size">更新时间</span>
@@ -51,7 +52,8 @@
             v-if="item.name"
             :key="i"
           >
-            <i class="el-icon-document" />
+            <i v-if="!item.url.match(/jpg|png|gif|jpeg|bmp/i)" class="el-icon-document" />
+            <img v-else v-viewer="item.url" :src="item.url" alt="">
             <a :class="$style.filename" v-text="item.name" @click="fileClick(item)" />
             <span :class="$style.size">{{(item.size / 1024).toFixed(4)}}KB</span>
             <span :class="$style.datetime">{{item.lastModified}}</span>
@@ -82,6 +84,7 @@ export default {
       showPreview: false,
       prefixes: [],
       files: [],
+      images: [],
       currentFile: {},
       dir: ''
     }
@@ -99,6 +102,11 @@ export default {
         const { result } = await getFiles(this.dir)
         this.prefixes = result.prefixes
         this.files = result.files
+        for (let f of this.files) {
+          if (f.url.match(/jpg|png|gif|jpeg|bmp/i)) {
+            this.images.push(f)
+          }
+        }
         // this.dir = result.dir
       } catch (e) {
         throw e
@@ -195,9 +203,10 @@ export default {
   }
   .file {
     display: grid;
-    grid-template-columns: 20px 500px 150px 150px auto;
+    grid-template-columns: 100px 500px 150px 150px auto;
     align-items: center;
     justify-content: start;
+    margin: 10px 0;
     line-height: 30px;
     padding: 0 10px;
     font-size: 12px;
@@ -205,6 +214,7 @@ export default {
       background-color: #efefef;
     }
     > i {
+      justify-self: center;
       font-size: 18px;
       color: #0eb2cc;
     }
@@ -212,6 +222,12 @@ export default {
       padding: 0 10px;
       color: #0070cc;
       @include elps();
+    }
+    > img {
+      width: 80px;
+      height: 80px;
+      justify-self: center;
+      object-fit: cover;
     }
     > .size {
     }
