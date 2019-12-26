@@ -4,19 +4,17 @@
       组件引用
     </div>
     <p :class="$style.step">第一步：拷贝项目下面生成的symbol代码：</p>
-    <code :class="$style.code">https://mallcdn.youpenglai.com/pl-icons/4de90020-26f5-11ea-ab30-8fed2aba56d5.js</code>
+    <code class="mb-20" :class="$style.code">https://mallcdn.youpenglai.com/pl-icons/4de90020-26f5-11ea-ab30-8fed2aba56d5.js</code>
     <p :class="$style.step">第二步：挑选相应图标并获取类名，应用于页面：</p>
 
-<pre>
-  <code :class="$style.code">
+<pre ><code :class="$style.code">
     <span :class="$style.tag">&lt;pl-svg</span>
       <span :class="$style.attr">name=<i :class="$style.attrValue">"icon-right"</i></span>
       <span :class="$style.attr">width=<i :class="$style.attrValue">"35"</i></span>
       <span :class="$style.attr">height=<i :class="$style.attrValue">"35"</i></span>
       <span :class="$style.attr">fill=<i :class="$style.attrValue">"#fff"</i></span>
     <span :class="$style.tag">/&gt;</span>
-  </code>
-</pre>
+  </code></pre>
   </div>
 </template>
 
