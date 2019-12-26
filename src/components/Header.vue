@@ -26,6 +26,12 @@
       >
         文件管理
       </el-menu-item>
+      <el-menu-item
+        :route="{ name: 'Helper' }"
+        index="4"
+      >
+        帮助
+      </el-menu-item>
     </el-menu>
 
     <div :class="$style.headerBg" />

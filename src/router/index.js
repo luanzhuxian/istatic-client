@@ -27,6 +27,25 @@ const routes = [
     meta: {
       title: '我的图片'
     }
+  },
+  {
+    path: '/helper',
+    name: 'Helper',
+    redirect: '/helper/code',
+    component: () => import('../views/Helper.vue'),
+    meta: {
+      title: '帮助文档'
+    },
+    children: [
+      {
+        path: 'code',
+        name: 'CodeHelper',
+        component: () => import('../views/Code-Helper.vue'),
+        meta: {
+          title: '代码应用'
+        }
+      }
+    ]
   }
 ]
 
