@@ -40,7 +40,7 @@
       <div :class="$style.files" v-if="files.length">
         <div :class="$style.file">
           <i />
-          <span />
+          <!--<span />-->
           <span :class="$style.filename">文件名称</span>
           <span :class="$style.size">文件大小</span>
           <span :class="$style.size">更新时间</span>
@@ -74,7 +74,7 @@
 import FilePreview from '../components/File-Preview.vue'
 import { getFiles, uploadFiles, createDir } from '../apis/oss'
 export default {
-  name: 'Image',
+  name: 'FileManager',
   components: {
     FilePreview
   },
@@ -101,6 +101,9 @@ export default {
       try {
         const { result } = await getFiles(this.dir)
         this.prefixes = result.prefixes
+        result.files.sort((a, b) => {
+          return new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime()
+        })
         this.files = result.files
         for (let f of this.files) {
           if (f.url.match(/jpg|png|gif|jpeg|bmp/i)) {

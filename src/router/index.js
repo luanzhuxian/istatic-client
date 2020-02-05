@@ -23,7 +23,7 @@ const routes = [
   {
     path: '/images',
     name: 'Images',
-    component: () => import('../views/Image.vue'),
+    component: () => import('../views/File-Manager.vue'),
     meta: {
       title: '我的图片'
     }
