@@ -57,7 +57,7 @@
             :key="i"
           >
             <i v-if="!item.url.match(/jpg|png|gif|jpeg|bmp/i)" class="el-icon-document" />
-            <img v-else v-viewer="item.url" :src="item.url" alt="">
+            <img v-else v-viewer="item.url" :src="item.url + '?x-oss-process=style/thum-mini'" @load="imgOnload" alt="">
             <a :class="$style.filename" v-text="item.name" @click="fileClick(item)" />
             <span :class="$style.size">{{(item.size / 1024).toFixed(4)}}KB</span>
             <span :class="$style.datetime">{{item.lastModified}}</span>
@@ -184,6 +184,18 @@ export default {
           throw e
         }
       }
+    },
+    imgOnload (e) {
+      let img = e.target
+      let w = img.naturalWidth
+      let h = img.naturalHeight
+      if (w >= h) {
+        img.style.width = '80px'
+        img.style.height = 'auto'
+      } else {
+        img.style.height = '80px'
+        img.style.width = 'auto'
+      }
     }
   }
 }
@@ -246,8 +258,8 @@ export default {
       @include elps();
     }
     > img {
-      width: 80px;
-      height: 80px;
+      /*width: 80px;*/
+      /*height: 80px;*/
       justify-self: center;
       object-fit: cover;
     }

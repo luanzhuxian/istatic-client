@@ -9,7 +9,7 @@
           </div>
           <div :class="$style.content">
             <div :class="$style.previewBox">
-              <img v-show="!error" ref="img" :src="data.url" alt="">
+              <img v-show="!error" ref="img" :src="data.url" alt="" @load="imgOnload">
               <span v-show="error">暂不支持预览</span>
             </div>
             <div :class="$style.detailInfo">
@@ -101,6 +101,18 @@ export default {
     },
     download (url, name) {
       download(url, name)
+    },
+    imgOnload (e) {
+      let img = e.target
+      let w = img.naturalWidth
+      let h = img.naturalHeight
+      if (w >= h) {
+        img.style.width = '450px'
+        img.style.height = 'auto'
+      } else {
+        img.style.height = '450px'
+        img.style.width = 'auto'
+      }
     }
   }
 }
