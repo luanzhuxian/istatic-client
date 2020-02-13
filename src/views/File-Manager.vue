@@ -57,7 +57,7 @@
             :key="i"
           >
             <i v-if="!item.url.match(/jpg|png|gif|jpeg|bmp/i)" class="el-icon-document" />
-            <img v-else v-viewer="item.url" :src="item.url + '?x-oss-process=style/thum-mini'" @load="imgOnload" alt="">
+            <img v-else v-viewer="{ url: item.url }" :src="item.url + '?x-oss-process=style/thum-mini'" @load="imgOnload" alt="">
             <a :class="$style.filename" v-text="item.name" @click="fileClick(item)" />
             <span :class="$style.size">{{(item.size / 1024).toFixed(4)}}KB</span>
             <span :class="$style.datetime">{{item.lastModified}}</span>
