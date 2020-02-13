@@ -18,3 +18,4 @@ export const uploadFiles = (dir, data) => fecth.post(`/api/file?dir=${dir}`, dat
  * @return {Promise<*>}
  */
 export const createDir = (dirname, path) => fecth.post(`/api/create/dir/${dirname}?path=${path}`)
+export const removeFile = (fileName) => fecth.delete(`/api/file/${fileName}`)

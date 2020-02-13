@@ -8,6 +8,10 @@
       <el-form-item>
         <el-button type="primary" @click="createDir">新建目录</el-button>
       </el-form-item>
+
+      <el-form-item>
+        <el-button type="primary" @click="getFiles">刷新</el-button>
+      </el-form-item>
     </el-form>
 
     <div :class="$style.fileList">
@@ -57,7 +61,10 @@
             <a :class="$style.filename" v-text="item.name" @click="fileClick(item)" />
             <span :class="$style.size">{{(item.size / 1024).toFixed(4)}}KB</span>
             <span :class="$style.datetime">{{item.lastModified}}</span>
-            <el-button type="text" @click="copy(item.url)">复制链接</el-button>
+            <div>
+              <el-button type="text" @click="copy(item.url)">复制链接</el-button>
+              <el-button type="text" @click="remove(item)">删除</el-button>
+            </div>
           </div>
         </template>
       </div>
@@ -72,7 +79,7 @@
 <script>
 /* eslint-disable */
 import FilePreview from '../components/File-Preview.vue'
-import { getFiles, uploadFiles, createDir } from '../apis/oss'
+import { getFiles, uploadFiles, createDir, removeFile } from '../apis/oss'
 export default {
   name: 'FileManager',
   components: {
@@ -138,6 +145,18 @@ export default {
         .then(() => {
           this.$success('复制成功！')
         })
+    },
+    async remove (item) {
+      try {
+        await this.$confirm({ title: '温馨提示', type: 'warning', message: '你确定删除吗？' })
+        await this.$confirm({ title: '温馨提示', type: 'warning', message: '你再确定一遍' })
+        await this.$confirm({ title: '温馨提示', type: 'warning', message: '删了就没有了，你再确定一下' })
+        await removeFile(encodeURIComponent(item.key))
+        this.$success('删除成功')
+        this.getFiles()
+      } catch (e) {
+        if (e) throw e
+      }
     },
     selectFile () {
       this.$refs.input.click()
