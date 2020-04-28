@@ -21,11 +21,12 @@ const routes = [
     }
   },
   {
-    path: '/images',
+    path: '/images/:path?',
     name: 'Images',
+    props: true,
     component: () => import('../views/File-Manager.vue'),
     meta: {
-      title: '我的图片'
+      title: '文件管理'
     }
   },
   {

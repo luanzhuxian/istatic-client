@@ -3,7 +3,7 @@
     <el-form inline size="mini">
       <el-form-item>
         <el-button @click="selectFile" type="primary">上传文件</el-button>
-        <input ref="input" v-show="false" type="file" multiple @change="fileChange">
+        <input ref="input" v-show="false" :type="type" multiple @change="fileChange">
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="createDir">新建目录</el-button>
@@ -93,11 +93,19 @@ export default {
       files: [],
       images: [],
       currentFile: {},
-      dir: ''
+      dir: '',
+      type: 'file'
     }
+  },
+  props: {
+    path: {
+      type: String,
+      default: ''
+    },
   },
   async activated () {
     try {
+      this.dir = this.path.replace(/_/g, '/')
       await this.getFiles()
     } catch (e) {
       throw e
@@ -124,6 +132,7 @@ export default {
     },
     async clickDir (prefixe) {
       this.dir += prefixe
+      this.$router.push({ name: 'Images', params: { path: this.dir.replace(/\//g, '_') } })
       try {
         await this.getFiles()
       } catch (e) {
@@ -134,6 +143,12 @@ export default {
       let dirArr = this.dir.split('/')
       dirArr.splice(index, 100)
       this.dir = dirArr.join('/') ? dirArr.join('/') + '/' : ''
+      console.log(this.dir)
+      if (this.dir) {
+        this.$router.push({ name: 'Images', params: { path: this.dir.replace(/\//g, '_') } })
+      } else {
+        this.$router.push({ name: 'Images' })
+      }
       this.getFiles()
     },
     fileClick (item) {
@@ -168,15 +183,22 @@ export default {
         data[`file${i}`] = file
       }
       try {
+        this.type = 'text'
         await uploadFiles(this.dir, data)
         await this.getFiles()
       } catch (e) {
         throw e
+      } finally {
+        this.type = 'file'
       }
     },
     async createDir () {
       try {
         const { value } = await this.$prompt('请输入目录名称')
+        if (!/^[A-Za-z0-9\-]+$/.test(value)) {
+          this.$warning('文件夹名称只能包含数字，字母，中划线')
+          return
+        }
         await createDir(value, this.dir)
         await this.getFiles()
       } catch (e) {
