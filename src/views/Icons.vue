@@ -107,6 +107,9 @@
               <el-tooltip class="item" effect="dark" content="预览" placement="left-start">
                 <i class="el-icon-full-screen" @click="preview(item)" />
               </el-tooltip>
+              <el-tooltip class="item" effect="dark" content="下载" placement="right-end">
+                <i class="el-icon-download" @click="download(item)" />
+              </el-tooltip>
             </div>
             <button @click="copyCode(item)">复制代码</button>
           </div>
@@ -123,6 +126,26 @@
       accept="image/svg+xml"
       @change="fileChange"
     >
+
+    <el-dialog
+      title="下载"
+      width="500px"
+      :visible.sync="showDownload"
+    >
+      <div id="download-svg-wrap" v-html="currentDownload.content" />
+      <div style="text-align: center; margin-top: 20px">
+        <el-radio v-model="downloadType" :label="1" border>SVG</el-radio>
+        <el-radio v-model="downloadType" :label="2" border>PNG</el-radio>
+      </div>
+      <div v-if="downloadType === 2" style="text-align: center; margin-top: 20px;">
+        宽度：<el-input-number v-model="downloadWidth" :min="50" :max="5000" step-strictly :step="50" />
+      </div>
+      <div style="text-align: center; margin-top: 20px">
+        <el-button type="primary" icon="el-icon-download" @click="downloadFile">
+          下载
+        </el-button>
+      </div>
+    </el-dialog>
 
     <div @click="showSvgPreview = false" :class="$style.svgPreivew" v-show="showSvgPreview" v-html="previewSvg" />
   </div>
@@ -152,6 +175,12 @@ export default {
       icons: [],
       currentProjectId: '',
       recycleBin: false,
+      showDownload: false,
+      currentDownload: {},
+      // 下载类型
+      downloadType: 1,
+      // 下载的图片宽度
+      downloadWidth: 150,
       see: true,
       showSvgPreview: false,
       changed: false,
@@ -325,6 +354,42 @@ export default {
     preview (item) {
       this.showSvgPreview = true
       this.previewSvg = item.content
+    },
+    // 下载
+    download (item) {
+      this.showDownload = true
+      this.currentDownload = item
+    },
+    downloadFile () {
+      const a = document.createElement('a')
+      const svgBolb = new Blob([this.currentDownload.content.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"')], { type: 'image/svg+xml' })
+      const URL = window.webkitURL.createObjectURL(svgBolb)
+      const downloadSvgWrap = document.getElementById('download-svg-wrap')
+      const svgWidth = downloadSvgWrap.offsetWidth
+      const svgHeight = downloadSvgWrap.offsetHeight
+      const ratio = svgHeight / svgWidth
+      a.download = this.currentDownload.icon_desc
+      if (this.downloadType === 1) {
+        a.href = URL
+        a.click()
+        // 下载svg
+      } else if (this.downloadType === 2) {
+        // 下载png
+        const cvs = document.createElement('canvas')
+        const img = document.createElement('img')
+        const ctx = cvs.getContext('2d')
+        img.width = cvs.width = this.downloadWidth
+        img.width = cvs.height = ratio * this.downloadWidth
+        img.src = URL
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0)
+          cvs.toBlob(blob => {
+            a.href = window.webkitURL.createObjectURL(blob)
+            a.download = this.currentDownload.icon_desc
+            a.click()
+          })
+        }
+      }
     },
     /**
      * 重新上传
