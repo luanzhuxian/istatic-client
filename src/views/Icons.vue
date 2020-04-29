@@ -56,6 +56,14 @@
         >
           上传图标至项目
         </el-button>
+        <el-button
+            round
+            type="primary"
+            icon="el-icon-download"
+            @click="downloadAll"
+        >
+          下载全部
+        </el-button>
         <el-checkbox
           size="small"
           :class="$style.recycleBin"
@@ -128,22 +136,32 @@
     >
 
     <el-dialog
-      title="下载"
-      width="500px"
+      :title="isDownloadAll ? '下载全部' : '下载'"
       :visible.sync="showDownload"
+      @close="downloadClose"
     >
-      <div id="download-svg-wrap" v-html="currentDownload.content" />
-      <div style="text-align: center; margin-top: 20px">
-        <el-radio v-model="downloadType" :label="1" border>SVG</el-radio>
-        <el-radio v-model="downloadType" :label="2" border>PNG</el-radio>
-      </div>
-      <div v-if="downloadType === 2" style="text-align: center; margin-top: 20px;">
-        宽度：<el-input-number v-model="downloadWidth" :min="50" :max="5000" step-strictly :step="50" />
-      </div>
-      <div style="text-align: center; margin-top: 20px">
-        <el-button type="primary" icon="el-icon-download" @click="downloadFile">
-          下载
-        </el-button>
+      <div :class="$style.downloadWarp">
+        <div  :class="$style.downloadSvgWrap" id="download-svg-wrap" v-html="currentDownload.content" />
+        <div class="controller">
+          <div style="text-align: center;">
+            <el-radio v-model="downloadType" :label="1" border>SVG</el-radio>
+            <el-radio v-model="downloadType" :label="2" border>PNG</el-radio>
+          </div>
+          <div v-if="downloadType === 2" style="margin-top: 20px;">
+            宽度：<el-input-number v-model="downloadWidth" :min="50" :max="5000" step-strictly :step="50" />
+          </div>
+          <div style="margin-top: 20px">
+            <el-button v-if="!isDownloadAll" type="primary" icon="el-icon-download" @click="downloadFile">
+              下载
+            </el-button>
+            <el-button v-if="isDownloadAll" :loading="autoDownloading" type="primary" @click="downloadAllFile">
+              确定
+            </el-button>
+            <el-button v-if="isDownloadAll" type="primary" @click="cancelDownloadAll">
+              取消下载
+            </el-button>
+          </div>
+        </div>
       </div>
     </el-dialog>
 
@@ -176,6 +194,8 @@ export default {
       currentProjectId: '',
       recycleBin: false,
       showDownload: false,
+      isDownloadAll: false,
+      autoDownloading: false,
       currentDownload: {},
       // 下载类型
       downloadType: 1,
@@ -360,10 +380,15 @@ export default {
       this.showDownload = true
       this.currentDownload = item
     },
-    downloadFile () {
+    downloadAll () {
+      this.showDownload = true
+      this.isDownloadAll = true
+    },
+    async downloadFile () {
       const a = document.createElement('a')
       const svgBolb = new Blob([this.currentDownload.content.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"')], { type: 'image/svg+xml' })
       const URL = window.webkitURL.createObjectURL(svgBolb)
+      await this.$nextTick()
       const downloadSvgWrap = document.getElementById('download-svg-wrap')
       const svgWidth = downloadSvgWrap.offsetWidth
       const svgHeight = downloadSvgWrap.offsetHeight
@@ -390,6 +415,31 @@ export default {
           })
         }
       }
+    },
+    // 启动下载全部文件
+    downloadAllFile () {
+      const I = this.icons[Symbol.iterator]()
+      this.autoDownloading = true
+      this.autoDownloadTimer = setInterval(() => {
+        const item = I.next().value
+        if (item) {
+          this.currentDownload = item
+          this.downloadFile()
+        } else {
+          clearInterval(this.autoDownloadTimer)
+          this.autoDownloading = false
+        }
+      }, 500)
+    },
+    cancelDownloadAll () {
+      clearInterval(this.autoDownloadTimer)
+      this.showDownload = false
+    },
+    downloadClose () {
+      this.autoDownloading = false
+      this.isDownloadAll = false
+      this.autoDownloading = false
+      this.currentDownload = {}
     },
     /**
      * 重新上传
@@ -434,6 +484,10 @@ export default {
     await next()
     this.currentProjectId = this.projectId
     this.iconsForm.projectId = this.currentProjectId
+    this.autoDownloading = false
+    this.isDownloadAll = false
+    this.showDownload = false
+    this.currentDownload = {}
     this.getIcons()
     this.getLink()
   }
@@ -662,6 +716,19 @@ export default {
     > svg {
       width: 200px;
       height: 200px;
+    }
+  }
+  .downloadWarp {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    > .downloadSvgWrap {
+      width: max-content;
+      margin-right: 30px;
+      background-color: #aabbcc;
+      > svg {
+        width: 300px;
+      }
     }
   }
 </style>
