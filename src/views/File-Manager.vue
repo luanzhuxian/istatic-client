@@ -195,8 +195,8 @@ export default {
     async createDir () {
       try {
         const { value } = await this.$prompt('请输入目录名称')
-        if (!/^[A-Za-z0-9\-]+$/.test(value)) {
-          this.$warning('文件夹名称只能包含数字，字母，中划线')
+        if (!/^[A-Za-z0-9.\-]+$/.test(value)) {
+          this.$warning('文件夹名称只能包含数字，字母，点和中划线')
           return
         }
         await createDir(value, this.dir)
