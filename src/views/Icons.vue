@@ -46,7 +46,7 @@
         >
           {{ see ? '收起在线链接' : '查看在线链接' }}
         </el-button>
-        <el-button
+        <!--<el-button
           round
           type="primary"
           plain
@@ -55,7 +55,7 @@
           :disabled="projects.length === 0"
         >
           上传图标至项目
-        </el-button>
+        </el-button>-->
         <el-button
             round
             type="primary"
