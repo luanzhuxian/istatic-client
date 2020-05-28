@@ -17,7 +17,7 @@
             <div>
               {{ item.name }}
             </div>
-            <div>
+            <div v-if="item.id !== 'has_removed'">
               <i @click.stop="editPro(item)" class="el-icon-edit"></i>
               <i @click.stop="delPro(item)" class="el-icon-delete"></i>
             </div>
@@ -46,7 +46,7 @@
         >
           {{ see ? '收起在线链接' : '查看在线链接' }}
         </el-button>
-        <!--<el-button
+        <el-button
           round
           type="primary"
           plain
@@ -55,7 +55,7 @@
           :disabled="projects.length === 0"
         >
           上传图标至项目
-        </el-button>-->
+        </el-button>
         <el-button
             round
             type="primary"
@@ -285,7 +285,8 @@ export default {
     async delPro (item) {
       try {
         await this.$confirm({
-          message: '确定删除？',
+          message: '删除后，该项目下的图标将移至“已删除项目的图标”下',
+          title: '确定删除？',
           type: 'warning'
         })
         await removeProject(item.id)
