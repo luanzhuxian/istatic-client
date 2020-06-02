@@ -75,7 +75,7 @@
         </el-checkbox>
       </div>
 
-      <div v-show="see">
+      <div v-if="currentProjectId !== 'has_removed'" v-show="see">
         <div :class="$style.tip" v-if="changed" @click="createLink">
           <i class="el-icon-warning-outline" />
           下方新 icon 来袭，点击更新代码
