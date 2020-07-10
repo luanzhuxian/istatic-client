@@ -282,21 +282,17 @@ export default {
         throw e
       }
     },
-    async delPro (item) {
+    async addProject () {
+      let val = ''
       try {
-        await this.$confirm({
-          message: '删除后，该项目下的图标将移至“已删除项目的图标”下',
-          title: '确定删除？',
-          type: 'warning'
-        })
-        await removeProject(item.id)
-        let index = this.projects.findIndex(pro => pro.id === item.id)
-        this.projects.splice(index, 1)
-        if (this.currentProjectId === item.id) {
-          this.currentProjectId = this.projects[0] ? this.projects[0].id : ''
-        }
-        await this.getIcons()
-        await this.getLink()
+        const { value } = await this.$prompt('请输入项目名称')
+        val = value
+      } catch (e) {
+        return
+      }
+      try {
+        await createProject({ name: val })
+        await this.init()
       } catch (e) {
         throw e
       }
@@ -319,17 +315,21 @@ export default {
         throw e
       }
     },
-    async addProject () {
-      let val = ''
+    async delPro (item) {
       try {
-        const { value } = await this.$prompt('请输入项目名称')
-        val = value
-      } catch (e) {
-        return
-      }
-      try {
-        await createProject({ name: val })
-        await this.init()
+        await this.$confirm({
+          message: '删除后，该项目下的图标将移至“已删除项目的图标”下',
+          title: '确定删除？',
+          type: 'warning'
+        })
+        await removeProject(item.id)
+        let index = this.projects.findIndex(pro => pro.id === item.id)
+        this.projects.splice(index, 1)
+        if (this.currentProjectId === item.id) {
+          this.currentProjectId = this.projects[0] ? this.projects[0].id : ''
+        }
+        await this.getIcons()
+        await this.getLink()
       } catch (e) {
         throw e
       }
@@ -351,9 +351,11 @@ export default {
         projectId: this.currentProjectId,
         id: this.isReUploadId ? this.isReUploadId : ''
       }
+
       for (let [i, file] of files.entries()) {
         data[`file${i}`] = file
       }
+
       await upload(data)
       this.isReUploadId = ''
       await this.getIcons()
@@ -370,6 +372,32 @@ export default {
       } catch (e) {
         throw e
       }
+    },
+    async remove (item) {
+      try {
+        await this.$confirm({
+          type: 'warning',
+          title: '确定删除吗？',
+          message: item.visible ? '删除后可在回收站中找回' : '删除后不可恢复！'
+        })
+        if (!item.visible) {
+          // 真删
+          await remove(item.id)
+          await this.getIcons()
+        } else {
+          // 假删
+          await this.updateIcons(item, { visible: 0 })
+        }
+      } catch (e) {
+        throw e
+      }
+    },
+    /**
+     * 重新上传
+     */
+    reUpload (item) {
+      this.upload()
+      this.isReUploadId = item.id
     },
     // 预览
     preview (item) {
@@ -441,32 +469,6 @@ export default {
       this.isDownloadAll = false
       this.autoDownloading = false
       this.currentDownload = {}
-    },
-    /**
-     * 重新上传
-     */
-    reUpload (item) {
-      this.upload()
-      this.isReUploadId = item.id
-    },
-    async remove (item) {
-      try {
-        await this.$confirm({
-          type: 'warning',
-          title: '确定删除吗？',
-          message: item.visible ? '删除后可在回收站中找回' : '删除后不可恢复！'
-        })
-        if (!item.visible) {
-          // 真删
-          await remove(item.id)
-          await this.getIcons()
-        } else {
-          // 假删
-          await this.updateIcons(item, { visible: 0 })
-        }
-      } catch (e) {
-        throw e
-      }
     },
     copyCode (item) {
       this.$copyText(item.icon_name)

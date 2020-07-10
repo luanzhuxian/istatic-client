@@ -99,29 +99,34 @@ export default class Fetch {
    */
   [CreateRequest] (url, body, config = {}) {
     const defaultConfig = this.copyObject(this.defaultConfig)
+
     // 用来终止请求的对象
     const controller = new AbortController()
+
     Object.assign(defaultConfig.headers || {}, config.headers)
     delete config.headers
     Object.assign(defaultConfig, config)
-    // 将body改为formData
+
+    // 将 body 改为 formData
     if (defaultConfig.type === 'FormData' && body) {
       let b = new FormData()
       for (let [k, v] of Object.entries(body)) {
         b.append(k, v)
       }
       defaultConfig.body = b
-      // formData类型不需要传Content-Type
+      // formData 类型不需要传 Content-Type
       delete defaultConfig.headers['Content-Type']
     } else if (body) {
       defaultConfig.body = JSON.stringify(body)
     }
-    // 生成Headers对象
+
+    // 生成 Headers 对象
     defaultConfig.headers = this[CreateHeaders](defaultConfig.headers)
     defaultConfig.signal = controller.signal
-    // 替换config中的headers对象为新构建的header对象
+    // 替换 config 中的 headers 对象为新构建的 header 对象
     url = (defaultConfig.baseURI || '') + url
-    // 如果超时，就终止请求，终止后，错误会在catch中捕获
+
+    // 如果超时，就终止请求，终止后，错误会在 catch 中捕获
     if (defaultConfig.timeout > 0) {
       this.timer = setTimeout(() => {
         controller.abort()
