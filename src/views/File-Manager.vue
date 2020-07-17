@@ -179,9 +179,11 @@ export default {
     async fileChange (e) {
       const files = Array.from(e.target.files)
       const data = {}
+
       for (let [i, file] of files.entries()) {
         data[`file${i}`] = file
       }
+      
       try {
         this.type = 'text'
         await uploadFiles(this.dir, data)
