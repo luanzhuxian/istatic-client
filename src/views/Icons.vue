@@ -3,29 +3,31 @@
     <div :class="$style.project">
       <div :class="$style.myProject">
         <div :class="$style.proTitle">
+          <span>我的项目</span>
           <i class="el-icon-circle-plus-outline" :class="$style.edit" @click="addProject" />
-          我的项目
         </div>
 
+        <!-- 左侧项目列表 -->
         <ul :class="$style.projectList">
           <li
             v-for="(item, i) of projects"
             :class="{ [$style.active]: currentProjectId === item.id }"
             :key="i"
-            @click="changeProject(item)"
+            @click="selectProject(item)"
           >
             <div>
               {{ item.name }}
             </div>
             <div v-if="item.id !== 'has_removed'">
-              <i @click.stop="editPro(item)" class="el-icon-edit"></i>
-              <i @click.stop="delPro(item)" class="el-icon-delete"></i>
+              <i class="el-icon-edit" @click.stop="editProject(item)" />
+              <i class="el-icon-delete" @click.stop="removeProject(item)" />
             </div>
           </li>
         </ul>
       </div>
     </div>
 
+    <!-- 右侧 -->
     <div :class="$style.iconsManage">
       <div :class="$style.proInfo">
         <div :class="$style.proName" v-if="currentProject.project_name" v-text="currentProject.project_name" />
@@ -42,60 +44,63 @@
           round
           type="primary"
           plain
-          @click="see = !see"
+          @click="isLinkShow = !isLinkShow"
         >
-          {{ see ? '收起在线链接' : '查看在线链接' }}
+          {{ isLinkShow ? '收起在线链接' : '查看在线链接' }}
         </el-button>
         <el-button
-          round
           type="primary"
-          plain
           icon="el-icon-upload2"
-          @click="upload"
+          round
+          plain
           :disabled="projects.length === 0"
+          @click="upload"
         >
           上传图标至项目
         </el-button>
         <el-button
-            round
             type="primary"
             icon="el-icon-download"
+            round
             @click="downloadAll"
         >
           下载全部
         </el-button>
         <el-checkbox
-          size="small"
           :class="$style.recycleBin"
+          size="small"
           v-model="recycleBin"
-          @change="changeRecycle"
           :disabled="projects.length === 0"
+          @change="recycleBinOnChange"
         >
           回收站
         </el-checkbox>
       </div>
 
-      <div v-if="currentProjectId !== 'has_removed'" v-show="see">
-        <div :class="$style.tip" v-if="changed" @click="createLink">
+      <div v-if="currentProjectId !== 'has_removed'" v-show="isLinkShow">
+        <div
+          :class="$style.tip"
+          v-if="isLinkChanged"
+          @click="createLink"
+        >
           <i class="el-icon-warning-outline" />
           下方新 icon 来袭，点击更新代码
         </div>
         <code
           :class="{
             [$style.link]: true,
-            [$style.disabled]: changed
+            [$style.disabled]: isLinkChanged
           }"
           v-if="link"
           v-text="link"
         />
       </div>
 
-      <ul
-        :class="$style.iconList">
+      <ul :class="$style.iconList">
         <li
+          :class="$style.iconItem"
           v-for="(item, i) of icons"
           :key="i"
-          :class="$style.iconItem"
         >
           <div :class="$style.svg" v-html="item.content" />
           <p :class="$style.svgDesc" v-text="item.icon_desc" />
@@ -123,7 +128,6 @@
           </div>
         </li>
       </ul>
-
     </div>
 
     <input
@@ -137,7 +141,7 @@
 
     <el-dialog
       :title="isDownloadAll ? '下载全部' : '下载'"
-      :visible.sync="showDownload"
+      :visible.sync="isDownloadModalShow"
       @close="downloadClose"
     >
       <div :class="$style.downloadWarp">
@@ -154,7 +158,7 @@
             <el-button v-if="!isDownloadAll" type="primary" icon="el-icon-download" @click="downloadFile">
               下载
             </el-button>
-            <el-button v-if="isDownloadAll" :loading="autoDownloading" type="primary" @click="downloadAllFile">
+            <el-button v-if="isDownloadAll" :loading="isAutoDownloading" type="primary" @click="downloadAllFile">
               确定
             </el-button>
             <el-button v-if="isDownloadAll" type="primary" @click="cancelDownloadAll">
@@ -165,9 +169,15 @@
       </div>
     </el-dialog>
 
-    <div @click="showSvgPreview = false" :class="$style.svgPreivew" v-show="showSvgPreview" v-html="previewSvg" />
+    <div
+      :class="$style.svgPreivew"
+      v-show="isSvgPreviewShow"
+      v-html="previewSvg"
+      @click="isSvgPreviewShow = false"
+    />
   </div>
 </template>
+
 <script>
 import {
   getProjects,
@@ -185,37 +195,38 @@ import {
   remove,
   updateIcons
 } from '../apis/icons'
+
 export default {
   name: 'Icons',
+  props: {
+    projectId: {
+      type: String,
+      default: ''
+    }
+  },
   data () {
     return {
       projects: [],
       icons: [],
       currentProjectId: '',
       recycleBin: false,
-      showDownload: false,
+      link: '',
+      isLinkShow: true,
+      isLinkChanged: false,
+      isDownloadModalShow: false,
       isDownloadAll: false,
-      autoDownloading: false,
+      isAutoDownloading: false,
       currentDownload: {},
       // 下载类型
       downloadType: 1,
       // 下载的图片宽度
       downloadWidth: 150,
-      see: true,
-      showSvgPreview: false,
-      changed: false,
-      link: '',
       previewSvg: '',
+      isSvgPreviewShow: false,
       iconsForm: {
         visible: 1,
         projectId: ''
       }
-    }
-  },
-  props: {
-    projectId: {
-      type: String,
-      default: ''
     }
   },
   computed: {
@@ -233,13 +244,18 @@ export default {
   methods: {
     async init () {
       try {
-        await this.getProjects()
         if (this.projectId) {
-          this.iconsForm.projectId = this.projectId
           this.currentProjectId = this.projectId
+          this.iconsForm.projectId = this.projectId
+          await this.getProjects()
           await this.getIcons()
           await this.getLink()
         } else {
+          await this.getProjects()
+          if (!this.currentProjectId && this.projects[0]) {
+            this.currentProjectId = this.projects[0].id
+          }
+          this.iconsForm.projectId = this.currentProjectId
           await this.$router.push({ name: 'Icons', params: { projectId: this.iconsForm.projectId } })
         }
       } catch (e) {
@@ -250,8 +266,6 @@ export default {
       try {
         let { result } = await getProjects()
         this.projects = result
-        this.currentProjectId = this.currentProjectId ? this.currentProjectId : result[0] ? result[0].id : ''
-        this.iconsForm.projectId = this.currentProjectId
       } catch (e) {
         throw e
       }
@@ -260,15 +274,15 @@ export default {
       try {
         let { result } = await getIcons(this.iconsForm)
         this.icons = result.list
-        this.changed = result.changed
+        this.isLinkChanged = result.changed
       } catch (e) {
         throw e
       }
     },
     async getLink () {
       try {
-        let { result } = await getLink(this.currentProjectId)
-        this.link = result ? result.link : ''
+        const { result = {} } = await getLink(this.currentProjectId)
+        this.link = result.link || ''
       } catch (e) {
         throw e
       }
@@ -290,6 +304,7 @@ export default {
       } catch (e) {
         return
       }
+
       try {
         await createProject({ name: val })
         await this.init()
@@ -297,25 +312,28 @@ export default {
         throw e
       }
     },
-    async editPro (item) {
+    async editProject (item) {
+      let name = ''
       try {
         const { value } = await this.$prompt({
           title: '请输入项目名称',
           inputValue: item.name
         })
-        item.name = value
+        name = value
       } catch (e) {
         return
       }
+
       try {
-        await updateProject(item.id, { name: item.name })
-        let index = this.projects.findIndex(pro => pro.id === item.id)
-        this.projects.splice(index, 1, item)
+        const { result } = await updateProject(item.id, { name })
+        this.$success('修改成功')
+        const index = this.projects.findIndex(pro => pro.id === item.id)
+        this.projects.splice(index, 1, result)
       } catch (e) {
         throw e
       }
     },
-    async delPro (item) {
+    async removeProject (item) {
       try {
         await this.$confirm({
           message: '删除后，该项目下的图标将移至“已删除项目的图标”下',
@@ -325,6 +343,7 @@ export default {
         await removeProject(item.id)
         let index = this.projects.findIndex(pro => pro.id === item.id)
         this.projects.splice(index, 1)
+
         if (this.currentProjectId === item.id) {
           this.currentProjectId = this.projects[0] ? this.projects[0].id : ''
         }
@@ -334,7 +353,7 @@ export default {
         throw e
       }
     },
-    async changeProject (pro) {
+    async selectProject (pro) {
       if (this.currentProjectId === pro.id) return
       this.currentProjectId = pro.id
       this.iconsForm.projectId = pro.id
@@ -401,16 +420,16 @@ export default {
     },
     // 预览
     preview (item) {
-      this.showSvgPreview = true
+      this.isSvgPreviewShow = true
       this.previewSvg = item.content
     },
     // 下载
     download (item) {
-      this.showDownload = true
+      this.isDownloadModalShow = true
       this.currentDownload = item
     },
     downloadAll () {
-      this.showDownload = true
+      this.isDownloadModalShow = true
       this.isDownloadAll = true
     },
     async downloadFile () {
@@ -448,7 +467,7 @@ export default {
     // 启动下载全部文件
     downloadAllFile () {
       const I = this.icons[Symbol.iterator]()
-      this.autoDownloading = true
+      this.isAutoDownloading = true
       this.autoDownloadTimer = setInterval(() => {
         const item = I.next().value
         if (item) {
@@ -456,18 +475,17 @@ export default {
           this.downloadFile()
         } else {
           clearInterval(this.autoDownloadTimer)
-          this.autoDownloading = false
+          this.isAutoDownloading = false
         }
       }, 500)
     },
     cancelDownloadAll () {
       clearInterval(this.autoDownloadTimer)
-      this.showDownload = false
+      this.isDownloadModalShow = false
     },
     downloadClose () {
-      this.autoDownloading = false
       this.isDownloadAll = false
-      this.autoDownloading = false
+      this.isAutoDownloading = false
       this.currentDownload = {}
     },
     copyCode (item) {
@@ -478,7 +496,7 @@ export default {
           this.$error(`复制成功失败，请手动复制`)
         })
     },
-    changeRecycle (val) {
+    recycleBinOnChange (val) {
       this.iconsForm.visible = val ? 0 : 1
       this.getIcons()
     }
@@ -487,22 +505,21 @@ export default {
     await next()
     this.currentProjectId = this.projectId
     this.iconsForm.projectId = this.currentProjectId
-    this.autoDownloading = false
+    this.isAutoDownloading = false
     this.isDownloadAll = false
-    this.showDownload = false
+    this.isDownloadModalShow = false
     this.currentDownload = {}
     this.getIcons()
     this.getLink()
   }
 }
 </script>
+
 <style module lang="scss">
   .icons {
     display: flex;
     justify-content: flex-start;
     padding: 30px 300px;
-  }
-  .project {
   }
   .myProject {
     width: 160px;
@@ -514,6 +531,7 @@ export default {
       color: #999;
 
       > .edit {
+        float: right;
         font-size: 16px;
         cursor: pointer;
         &:hover {

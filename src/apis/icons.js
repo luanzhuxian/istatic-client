@@ -1,4 +1,4 @@
-import fecth from '../assets/js/fetch-config'
+import fetch from '../assets/js/fetch-config'
 
 /**
  * 获取图标
@@ -7,7 +7,7 @@ import fecth from '../assets/js/fetch-config'
  * @property params.recycle {number} 1 正常图标， 0 回收站图标
  * @return {Promise<*>}
  */
-export const getIcons = (params) => fecth.get(`/api/icons`, { params })
+export const getIcons = (params) => fetch.get(`/api/icons`, { params })
 /**
  * 上传图标
  * @param data {object}
@@ -18,8 +18,8 @@ export const getIcons = (params) => fecth.get(`/api/icons`, { params })
  * ...
  * @return {Promise<*>}
  */
-export const upload = (data) => fecth.post('/api/icons', data, { type: 'FormData' })
-export const remove = (id) => fecth.delete(`/api/icons/${id}`)
+export const upload = (data) => fetch.post('/api/icons', data, { type: 'FormData' })
+export const remove = (id) => fetch.delete(`/api/icons/${id}`)
 /**
  * 更新图标
  * @param id {string}
@@ -31,4 +31,4 @@ export const remove = (id) => fecth.delete(`/api/icons/${id}`)
  * @property body.visible {number}
  * @return {Promise<*>}
  */
-export const updateIcons = (id, body) => fecth.put(`/api/icons/${id}`, body)
+export const updateIcons = (id, body) => fetch.put(`/api/icons/${id}`, body)

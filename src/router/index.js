@@ -47,6 +47,15 @@ const routes = [
         }
       }
     ]
+  },
+  {
+    path: '/test',
+    name: 'Test',
+    props: true,
+    component: () => import('../views/Test.vue'),
+    meta: {
+      title: '随便玩玩'
+    }
   }
 ]
 

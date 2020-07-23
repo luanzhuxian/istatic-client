@@ -2,8 +2,8 @@
   <div :class="$style.image">
     <el-form inline size="mini">
       <el-form-item>
-        <el-button @click="selectFile" type="primary">上传文件</el-button>
-        <input ref="input" v-show="false" :type="type" multiple @change="fileChange">
+        <el-button @click="uploadFile" type="primary">上传文件</el-button>
+        <input ref="input" v-show="false" :type="type" multiple @change="onFileChange">
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="createDir">新建目录</el-button>
@@ -15,15 +15,15 @@
     </el-form>
 
     <div :class="$style.fileList">
-      <div :class="$style.history">
-        <el-button size="middle" type="text" @click="history(0, '')">. /</el-button>
+      <div :class="$style.path">
+        <el-button size="middle" type="text" @click="clickPath(0, '')">. /</el-button>
         <template v-for="(item, i) of dir.split('/')">
           <el-button
             v-if="item"
             :key="i"
             type="text"
             size="middle"
-            @click="history(i + 1, item)"
+            @click="clickPath(i + 1, item)"
             :disabled="i === dir.split('/').length - 2"
           >
             {{ item + (i === dir.split('/').length - 2 ? '' : '/') }}
@@ -58,11 +58,11 @@
           >
             <i v-if="!item.url.match(/jpg|png|gif|jpeg|bmp/i)" class="el-icon-document" />
             <img v-else v-viewer="{ url: 'data-big' }" :data-big="item.url" :src="item.url + '?x-oss-process=style/thum-mini'" @load="imgOnload" alt="">
-            <a :class="$style.filename" v-text="item.name" @click="fileClick(item)" />
+            <a :class="$style.filename" v-text="item.name" @click="preview(item)" />
             <span :class="$style.size">{{(item.size / 1024).toFixed(4)}}KB</span>
             <span :class="$style.datetime">{{item.lastModified}}</span>
             <div>
-              <el-button type="text" @click="copy(item.url)">复制链接</el-button>
+              <el-button type="text" @click="copyURL(item.url)">复制链接</el-button>
               <el-button type="text" @click="remove(item)">删除</el-button>
             </div>
           </div>
@@ -130,53 +130,10 @@ export default {
         throw e
       }
     },
-    async clickDir (prefixe) {
-      this.dir += prefixe
-      this.$router.push({ name: 'Images', params: { path: this.dir.replace(/\//g, '_') } })
-      try {
-        await this.getFiles()
-      } catch (e) {
-        throw e
-      }
-    },
-    history (index) {
-      let dirArr = this.dir.split('/')
-      dirArr.splice(index, 100)
-      this.dir = dirArr.join('/') ? dirArr.join('/') + '/' : ''
-      console.log(this.dir)
-      if (this.dir) {
-        this.$router.push({ name: 'Images', params: { path: this.dir.replace(/\//g, '_') } })
-      } else {
-        this.$router.push({ name: 'Images' })
-      }
-      this.getFiles()
-    },
-    fileClick (item) {
-      this.showPreview = true
-      this.currentFile = item
-    },
-    copy (url) {
-      this.$copyText(url)
-        .then(() => {
-          this.$success('复制成功！')
-        })
-    },
-    async remove (item) {
-      try {
-        await this.$confirm({ title: '温馨提示', type: 'warning', message: '你确定删除吗？' })
-        await this.$confirm({ title: '温馨提示', type: 'warning', message: '你再确定一遍' })
-        await this.$confirm({ title: '温馨提示', type: 'warning', message: '删了就没有了，你再确定一下' })
-        await removeFile(encodeURIComponent(item.key))
-        this.$success('删除成功')
-        this.getFiles()
-      } catch (e) {
-        if (e) throw e
-      }
-    },
-    selectFile () {
+    uploadFile () {
       this.$refs.input.click()
     },
-    async fileChange (e) {
+    async onFileChange (e) {
       const files = Array.from(e.target.files)
       const data = {}
 
@@ -194,6 +151,23 @@ export default {
         this.type = 'file'
       }
     },
+    // TODO:
+    // item.key: static/wwec2020123.jpg
+    // encodeURIComponent(item.key) => static%2F820%2Fwwec2020123.jpg
+    // item.key: static/wwec图片大会.jpg
+    // encodeURIComponent(item.key) => static%2Fadmall%2Fskin%2Fwwec%E5%9B%BE%E7%89%87%E5%A4%A7%E4%BC%9A.jpg
+    async remove (item) {
+      try {
+        await this.$confirm({ title: '温馨提示', type: 'warning', message: '你确定删除吗？' })
+        await this.$confirm({ title: '温馨提示', type: 'warning', message: '你再确定一遍' })
+        await this.$confirm({ title: '温馨提示', type: 'warning', message: '删了就没有了，你再确定一下' })
+        await removeFile(encodeURIComponent(item.key))
+        this.$success('删除成功')
+        this.getFiles()
+      } catch (e) {
+        if (e) throw e
+      }
+    },
     async createDir () {
       try {
         const { value } = await this.$prompt('请输入目录名称')
@@ -208,6 +182,36 @@ export default {
           throw e
         }
       }
+    },
+    clickPath (index) {
+      let dirArr = this.dir.split('/')
+      dirArr.splice(index, 100)
+      this.dir = dirArr.join('/') ? dirArr.join('/') + '/' : ''
+      if (this.dir) {
+        this.$router.push({ name: 'Images', params: { path: this.dir.replace(/\//g, '_') } })
+      } else {
+        this.$router.push({ name: 'Images' })
+      }
+      this.getFiles()
+    },
+    async clickDir (prefixe) {
+      this.dir += prefixe
+      this.$router.push({ name: 'Images', params: { path: this.dir.replace(/\//g, '_') } })
+      try {
+        await this.getFiles()
+      } catch (e) {
+        throw e
+      }
+    },
+    preview (item) {
+      this.showPreview = true
+      this.currentFile = item
+    },
+    copyURL (url) {
+      this.$copyText(url)
+        .then(() => {
+          this.$success('复制成功！')
+        })
     },
     imgOnload (e) {
       let img = e.target
@@ -234,7 +238,7 @@ export default {
   }
   .fileList {
     padding: 20px 0;
-    > .history {
+    > .path {
       color: #598bf8;
       margin-bottom: 10px;
       button {

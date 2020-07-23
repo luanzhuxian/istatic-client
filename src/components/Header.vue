@@ -32,6 +32,12 @@
       >
         帮助
       </el-menu-item>
+      <el-menu-item
+        :route="{ name: 'Test' }"
+        index="5"
+      >
+        test
+      </el-menu-item>
     </el-menu>
 
     <div :class="$style.headerBg" />
