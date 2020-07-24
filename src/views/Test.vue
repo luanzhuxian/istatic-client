@@ -26,6 +26,7 @@
               <div class="btn-group">
                 <el-button plain @click="copy(item.content)">复制base64</el-button>
                 <el-button plain @click="save(item)">保存到服务器</el-button>
+                <el-button plain @click="remove(item)">删除</el-button>
               </div>
           </li>
       </ul>
@@ -62,7 +63,6 @@ export default {
       this.$refs.input.click()
     },
     async onChange (e) {
-    //   console.log(e)
       const files = Array.from(e.target.files)
       const data = {}
 
@@ -87,10 +87,23 @@ export default {
           this.$error(`复制成功失败，请手动复制`)
         })
     },
-    async save ({ content, name }) {
+    async save ({ id }) {
       try {
-        await fetch.post('api/convert/save', { content, name })
+        await fetch.post(`api/convert/save/${id}`)
         this.$success('保存成功')
+      } catch (error) {
+        throw error
+      }
+    },
+    async remove ({ id }) {
+      await this.$confirm({ title: '温馨提示', type: 'warning', message: '你确定删除吗？' })
+
+      try {
+        await fetch.delete(`api/convert/${id}`)
+        this.$success('删除成功')
+
+        const index = this.list.findIndex(item => item.id === id)
+        this.list.splice(index, 1)
       } catch (error) {
         throw error
       }
@@ -116,6 +129,7 @@ export default {
                 margin: 0 10px;
                 flex: 1;
                 width: 0;
+                min-width: 200px;
                 max-height: 300px;
                 overflow-y: scroll;
             }
