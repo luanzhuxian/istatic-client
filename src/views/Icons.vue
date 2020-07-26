@@ -115,7 +115,7 @@
                 <i class="el-icon-upload2" @click="reUpload(item)" />
               </el-tooltip>
               <el-tooltip v-if="!item.visible" class="item" effect="dark" content="还原" placement="left-start">
-                <i class="el-icon-refresh-left" @click="updateIcons(item, { visible: 1 })" />
+                <i class="el-icon-refresh-left" @click="update(item, { visible: 1 })" />
               </el-tooltip>
               <el-tooltip class="item" effect="dark" content="预览" placement="left-start">
                 <i class="el-icon-full-screen" @click="preview(item)" />
@@ -145,7 +145,7 @@
       @close="downloadClose"
     >
       <div :class="$style.downloadWarp">
-        <div  :class="$style.downloadSvgWrap" id="download-svg-wrap" v-html="currentDownload.content" />
+        <div id="download-svg-wrap" :class="$style.downloadSvgWrap" v-html="currentDownloadSvg.content" />
         <div class="controller">
           <div style="text-align: center;">
             <el-radio v-model="downloadType" :label="1" border>SVG</el-radio>
@@ -171,9 +171,9 @@
 
     <div
       :class="$style.svgPreivew"
-      v-show="isSvgPreviewShow"
-      v-html="previewSvg"
-      @click="isSvgPreviewShow = false"
+      v-show="isPreviewerShow"
+      v-html="currentPreviewSvg"
+      @click="isPreviewerShow = false"
     />
   </div>
 </template>
@@ -216,13 +216,13 @@ export default {
       isDownloadModalShow: false,
       isDownloadAll: false,
       isAutoDownloading: false,
-      currentDownload: {},
+      currentDownloadSvg: {},
       // 下载类型
       downloadType: 1,
       // 下载的图片宽度
       downloadWidth: 150,
-      previewSvg: '',
-      isSvgPreviewShow: false,
+      currentPreviewSvg: '',
+      isPreviewerShow: false,
       iconsForm: {
         visible: 1,
         projectId: ''
@@ -256,7 +256,12 @@ export default {
             this.currentProjectId = this.projects[0].id
           }
           this.iconsForm.projectId = this.currentProjectId
-          await this.$router.push({ name: 'Icons', params: { projectId: this.iconsForm.projectId } })
+          await this.$router.push({
+            name: 'Icons',
+            params: {
+              projectId: this.iconsForm.projectId
+            }
+          })
         }
       } catch (e) {
         throw e
@@ -353,13 +358,14 @@ export default {
         throw e
       }
     },
-    async selectProject (pro) {
-      if (this.currentProjectId === pro.id) return
-      this.currentProjectId = pro.id
-      this.iconsForm.projectId = pro.id
-      this.recycleBin = false
+    async selectProject ({ id }) {
+      if (this.currentProjectId === id) return
+
+      this.currentProjectId = id
+      this.iconsForm.projectId = id
       this.iconsForm.visible = 1
-      await this.$router.push({ name: 'Icons', params: { projectId: pro.id } })
+      this.recycleBin = false
+      await this.$router.push({ name: 'Icons', params: { projectId: id } })
     },
     upload () {
       this.$refs.fileSelect.click()
@@ -384,7 +390,7 @@ export default {
      * @param item {object} 当前图标
      * @param fields {object} 要更新的字段
      */
-    async updateIcons (item, fields) {
+    async update (item, fields) {
       try {
         await updateIcons(item.id, fields)
         await this.getIcons()
@@ -405,7 +411,7 @@ export default {
           await this.getIcons()
         } else {
           // 假删
-          await this.updateIcons(item, { visible: 0 })
+          await this.update(item, { visible: 0 })
         }
       } catch (e) {
         throw e
@@ -415,50 +421,59 @@ export default {
      * 重新上传
      */
     reUpload (item) {
-      this.upload()
       this.isReUploadId = item.id
+      this.upload()
     },
     // 预览
     preview (item) {
-      this.isSvgPreviewShow = true
-      this.previewSvg = item.content
+      this.isPreviewerShow = true
+      this.currentPreviewSvg = item.content
     },
-    // 下载
     download (item) {
       this.isDownloadModalShow = true
-      this.currentDownload = item
+      this.currentDownloadSvg = item
     },
     downloadAll () {
       this.isDownloadModalShow = true
       this.isDownloadAll = true
     },
     async downloadFile () {
-      const a = document.createElement('a')
-      const svgBolb = new Blob([this.currentDownload.content.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"')], { type: 'image/svg+xml' })
+      // TODO:
+      const svgBolb = new Blob([this.currentDownloadSvg.content.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"')], { type: 'image/svg+xml' })
+
+      console.log(1111111111, svgBolb)
       const URL = window.webkitURL.createObjectURL(svgBolb)
-      await this.$nextTick()
+      console.log(2222222222, URL)
+
+      // await this.$nextTick()
+
+      const a = document.createElement('a')
       const downloadSvgWrap = document.getElementById('download-svg-wrap')
       const svgWidth = downloadSvgWrap.offsetWidth
       const svgHeight = downloadSvgWrap.offsetHeight
       const ratio = svgHeight / svgWidth
-      a.download = this.currentDownload.icon_desc
+
       if (this.downloadType === 1) {
-        a.href = URL
-        a.click()
         // 下载svg
+
+        a.href = URL
+        a.download = this.currentDownloadSvg.icon_desc
+        a.click()
       } else if (this.downloadType === 2) {
         // 下载png
-        const cvs = document.createElement('canvas')
+        const canvas = document.createElement('canvas')
         const img = document.createElement('img')
-        const ctx = cvs.getContext('2d')
-        img.width = cvs.width = this.downloadWidth
-        img.width = cvs.height = ratio * this.downloadWidth
+        const ctx = canvas.getContext('2d')
+        img.width = canvas.width = this.downloadWidth
+        img.width = canvas.height = ratio * this.downloadWidth
         img.src = URL
+
         img.onload = () => {
           ctx.drawImage(img, 0, 0)
-          cvs.toBlob(blob => {
+          // TODO:
+          canvas.toBlob(blob => {
             a.href = window.webkitURL.createObjectURL(blob)
-            a.download = this.currentDownload.icon_desc
+            a.download = this.currentDownloadSvg.icon_desc
             a.click()
           })
         }
@@ -466,16 +481,16 @@ export default {
     },
     // 启动下载全部文件
     downloadAllFile () {
-      const I = this.icons[Symbol.iterator]()
+      const iterator = this.icons[Symbol.iterator]()
       this.isAutoDownloading = true
+
       this.autoDownloadTimer = setInterval(() => {
-        const item = I.next().value
+        const item = iterator.next().value
         if (item) {
-          this.currentDownload = item
+          this.currentDownloadSvg = item
           this.downloadFile()
         } else {
-          clearInterval(this.autoDownloadTimer)
-          this.isAutoDownloading = false
+          this.cancelDownloadAll()
         }
       }, 500)
     },
@@ -486,7 +501,7 @@ export default {
     downloadClose () {
       this.isDownloadAll = false
       this.isAutoDownloading = false
-      this.currentDownload = {}
+      this.currentDownloadSvg = {}
     },
     copyCode (item) {
       this.$copyText(item.icon_name)
@@ -508,7 +523,7 @@ export default {
     this.isAutoDownloading = false
     this.isDownloadAll = false
     this.isDownloadModalShow = false
-    this.currentDownload = {}
+    this.currentDownloadSvg = {}
     this.getIcons()
     this.getLink()
   }

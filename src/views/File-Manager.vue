@@ -70,7 +70,7 @@
       </div>
     </div>
     <FilePreview
-      :show.sync="showPreview"
+      :show.sync="isPreviewerShow"
       :data="currentFile"
     />
   </div>
@@ -88,7 +88,7 @@ export default {
   data () {
     return {
       credentials: null,
-      showPreview: false,
+      isPreviewerShow: false,
       prefixes: [],
       files: [],
       images: [],
@@ -115,17 +115,18 @@ export default {
     async getFiles () {
       try {
         const { result } = await getFiles(this.dir)
-        this.prefixes = result.prefixes
         result.files.sort((a, b) => {
           return new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime()
         })
         this.files = result.files
+        this.prefixes = result.prefixes
+        // this.dir = result.dir
+
         for (let f of this.files) {
           if (f.url.match(/jpg|png|gif|jpeg|bmp/i)) {
             this.images.push(f)
           }
         }
-        // this.dir = result.dir
       } catch (e) {
         throw e
       }
@@ -140,7 +141,7 @@ export default {
       for (let [i, file] of files.entries()) {
         data[`file${i}`] = file
       }
-      
+
       try {
         this.type = 'text'
         await uploadFiles(this.dir, data)
@@ -171,10 +172,12 @@ export default {
     async createDir () {
       try {
         const { value } = await this.$prompt('请输入目录名称')
+
         if (!/^[A-Za-z0-9.\-]+$/.test(value)) {
           this.$warning('文件夹名称只能包含数字，字母，点和中划线')
           return
         }
+
         await createDir(value, this.dir)
         await this.getFiles()
       } catch (e) {
@@ -183,7 +186,7 @@ export default {
         }
       }
     },
-    clickPath (index) {
+    async clickPath (index) {
       let dirArr = this.dir.split('/')
       dirArr.splice(index, 100)
       this.dir = dirArr.join('/') ? dirArr.join('/') + '/' : ''
@@ -192,7 +195,11 @@ export default {
       } else {
         this.$router.push({ name: 'Images' })
       }
-      this.getFiles()
+      try {
+        await this.getFiles()
+      } catch (e) {
+        throw e
+      }
     },
     async clickDir (prefixe) {
       this.dir += prefixe
@@ -204,7 +211,7 @@ export default {
       }
     },
     preview (item) {
-      this.showPreview = true
+      this.isPreviewerShow = true
       this.currentFile = item
     },
     copyURL (url) {

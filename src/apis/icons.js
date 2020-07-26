@@ -8,6 +8,7 @@ import fetch from '../assets/js/fetch-config'
  * @return {Promise<*>}
  */
 export const getIcons = (params) => fetch.get(`/api/icons`, { params })
+
 /**
  * 上传图标
  * @param data {object}
@@ -19,7 +20,9 @@ export const getIcons = (params) => fetch.get(`/api/icons`, { params })
  * @return {Promise<*>}
  */
 export const upload = (data) => fetch.post('/api/icons', data, { type: 'FormData' })
+
 export const remove = (id) => fetch.delete(`/api/icons/${id}`)
+
 /**
  * 更新图标
  * @param id {string}
