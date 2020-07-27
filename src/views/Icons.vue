@@ -438,12 +438,13 @@ export default {
       this.isDownloadAll = true
     },
     async downloadFile () {
-      // TODO:
+      // TODO: 为什么下载时要加xmlns
+      // svgBolb: Blob {size: 2570, type: "image/svg+xml"}
       const svgBolb = new Blob([this.currentDownloadSvg.content.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"')], { type: 'image/svg+xml' })
 
-      console.log(1111111111, svgBolb)
+      // createObjectURL 创建一个 DOMString
+      // URL："blob:http://localhost:8001/a07f9466-1980-475b-9bfe-47dd92f16c18"
       const URL = window.webkitURL.createObjectURL(svgBolb)
-      console.log(2222222222, URL)
 
       // await this.$nextTick()
 
@@ -470,7 +471,7 @@ export default {
 
         img.onload = () => {
           ctx.drawImage(img, 0, 0)
-          // TODO:
+          // 创造Blob对象，用以展示canvas上的图片；这个图片文件可以被缓存或保存到本地
           canvas.toBlob(blob => {
             a.href = window.webkitURL.createObjectURL(blob)
             a.download = this.currentDownloadSvg.icon_desc

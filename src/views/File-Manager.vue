@@ -2,7 +2,7 @@
   <div :class="$style.image">
     <el-form inline size="mini">
       <el-form-item>
-        <el-button @click="uploadFile" type="primary">上传文件</el-button>
+        <el-button @click="upload" type="primary">上传文件</el-button>
         <input ref="input" v-show="false" :type="type" multiple @change="onFileChange">
       </el-form-item>
       <el-form-item>
@@ -23,8 +23,8 @@
             :key="i"
             type="text"
             size="middle"
-            @click="clickPath(i + 1, item)"
             :disabled="i === dir.split('/').length - 2"
+            @click="clickPath(i + 1, item)"
           >
             {{ item + (i === dir.split('/').length - 2 ? '' : '/') }}
           </el-button>
@@ -122,16 +122,16 @@ export default {
         this.prefixes = result.prefixes
         // this.dir = result.dir
 
-        for (let f of this.files) {
-          if (f.url.match(/jpg|png|gif|jpeg|bmp/i)) {
-            this.images.push(f)
+        for (let file of this.files) {
+          if (file.url.match(/jpg|png|gif|jpeg|bmp/i)) {
+            this.images.push(file)
           }
         }
       } catch (e) {
         throw e
       }
     },
-    uploadFile () {
+    upload () {
       this.$refs.input.click()
     },
     async onFileChange (e) {
@@ -190,20 +190,23 @@ export default {
       let dirArr = this.dir.split('/')
       dirArr.splice(index, 100)
       this.dir = dirArr.join('/') ? dirArr.join('/') + '/' : ''
+
       if (this.dir) {
         this.$router.push({ name: 'Images', params: { path: this.dir.replace(/\//g, '_') } })
       } else {
         this.$router.push({ name: 'Images' })
       }
+
       try {
         await this.getFiles()
       } catch (e) {
         throw e
       }
     },
-    async clickDir (prefixe) {
-      this.dir += prefixe
+    async clickDir (prefix) {
+      this.dir += prefix
       this.$router.push({ name: 'Images', params: { path: this.dir.replace(/\//g, '_') } })
+
       try {
         await this.getFiles()
       } catch (e) {
