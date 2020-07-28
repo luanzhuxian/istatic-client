@@ -297,6 +297,7 @@ export default {
         await createLink(this.currentProjectId)
         await this.getLink()
         await this.getIcons()
+        this.$success('操作成功')
       } catch (e) {
         throw e
       }
@@ -313,6 +314,7 @@ export default {
       try {
         await createProject({ name: val })
         await this.init()
+        this.$success('操作成功')
       } catch (e) {
         throw e
       }
@@ -332,6 +334,7 @@ export default {
       try {
         const { result } = await updateProject(item.id, { name })
         this.$success('修改成功')
+
         const index = this.projects.findIndex(pro => pro.id === item.id)
         this.projects.splice(index, 1, result)
       } catch (e) {
@@ -346,6 +349,8 @@ export default {
           type: 'warning'
         })
         await removeProject(item.id)
+        this.$success('删除成功')
+
         let index = this.projects.findIndex(pro => pro.id === item.id)
         this.projects.splice(index, 1)
 
@@ -382,6 +387,7 @@ export default {
       }
 
       await upload(data)
+      this.$success('上传成功')
       this.isReUploadId = ''
       await this.getIcons()
     },
@@ -413,6 +419,7 @@ export default {
           // 假删
           await this.update(item, { visible: 0 })
         }
+        this.$success('删除成功')
       } catch (e) {
         throw e
       }
