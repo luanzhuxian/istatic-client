@@ -445,7 +445,7 @@ export default {
       this.isDownloadAll = true
     },
     async downloadFile () {
-      // TODO: 为什么下载时要加xmlns
+      // TODO: 为什么下载时要加命名空间 xmlns
       // svgBolb: Blob {size: 2570, type: "image/svg+xml"}
       const svgBolb = new Blob([this.currentDownloadSvg.content.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"')], { type: 'image/svg+xml' })
 
