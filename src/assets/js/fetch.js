@@ -59,6 +59,7 @@ export default class Fetch {
   async [request] (url, body, config = {}) {
     // 配置请求拦截器
     if (this.interceptors.request) {
+      // 拦截器通过则返回 config
       config = this.interceptors.request(url, config)
     }
     if (config.params) {
@@ -69,7 +70,11 @@ export default class Fetch {
     try {
       let res
       if (this.interceptors.response) {
-        res = await this.interceptors.response(fetch(req))
+        // TODO:
+        // 发送请求，同时将返回数据传入响应拦截器
+        res = await fetch(req)
+        res = res[config.responseType || 'json']() // res = await res.json()
+        res = await this.interceptors.response(res, config)
       } else {
         res = await fetch(req)
       }

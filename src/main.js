@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import filters from './filter'
 import VueClipboard from 'vue-clipboard2'
 
 import './assets/scss/index.scss'
@@ -14,6 +15,10 @@ Vue.use(VueClipboard)
 VueClipboard.config.autoSetContainer = true
 
 Vue.config.productionTip = false
+
+for (const k of Object.keys(filters)) {
+  Vue.filter(k, filters[k])
+}
 
 new Vue({
   router,

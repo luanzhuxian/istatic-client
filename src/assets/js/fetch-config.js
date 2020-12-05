@@ -13,8 +13,10 @@ fetch.interceptors.request = (url, config) => {
 }
 fetch.interceptors.response = async resPromise => {
   try {
-    let res = await resPromise
-    res = await res.json()
+    const res = await resPromise
+    if (res instanceof Blob) {
+      return res
+    }
     if (res.status !== 200) {
       throw new Error(res.message)
     }

@@ -44,6 +44,7 @@
           round
           type="primary"
           plain
+          :disabled="currentProject.disabled"
           @click="isLinkShow = !isLinkShow"
         >
           {{ isLinkShow ? '收起在线链接' : '查看在线链接' }}
@@ -53,11 +54,23 @@
           icon="el-icon-upload2"
           round
           plain
-          :disabled="projects.length === 0"
+          :disabled="projects.length === 0 || currentProject.disabled"
           @click="upload"
         >
           上传图标至项目
         </el-button>
+
+        <el-radio-group
+            class="mr-10 ml-10"
+            v-model="linkType"
+            :disabled="currentProject.disabled"
+            @change="changeLinkType"
+         >
+          <el-radio-button label="Symbol"></el-radio-button>
+          <el-radio-button label="Font Class"></el-radio-button>
+          <el-radio-button label="unicode"></el-radio-button>
+        </el-radio-group>
+
         <el-button
             type="primary"
             icon="el-icon-download"
@@ -77,7 +90,7 @@
         </el-checkbox>
       </div>
 
-      <div v-if="currentProjectId !== 'has_removed'" v-show="isLinkShow">
+      <div v-if="!currentProject.disabled" v-show="isLinkShow">
         <div
           :class="$style.tip"
           v-if="isLinkChanged"
@@ -92,9 +105,41 @@
             [$style.disabled]: isLinkChanged
           }"
           v-if="link"
-          v-text="link"
-        />
+        >
+            <span v-text="link" />
+            <el-button :disabled="isLinkChanged" type="text" round @click="downloadIcons">下载图标</el-button>
+        </code>
+
+        <el-form inline class="mt-20">
+          <el-form-item label="Font Family：">
+            <el-input v-model="currentFontFace" style="width: 200px;" placeholder="自定义css font-family的值" />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="text" @click="setFontFace">使用</el-button>
+          </el-form-item>
+        </el-form>
       </div>
+
+      <el-alert
+        class="mt-10"
+        :closable="false"
+        type="warning"
+        show-icon
+      >
+        <span slot="title">
+          Font Class 只支持单色图标，多色图标请使用 Symbol 方式，(即 <code>pl-svg</code> 组件)
+        </span>
+      </el-alert>
+      <el-alert
+          class="mt-10"
+          :closable="false"
+          type="warning"
+          show-icon
+      >
+        <span slot="title">
+          如果同一个项目引入两个以上的图标库，要避免css文件中的Font-Face不重复，否则后引入的会覆盖前面引入的
+        </span>
+      </el-alert>
 
       <ul :class="$style.iconList">
         <li
@@ -104,7 +149,8 @@
         >
           <div :class="$style.svg" v-html="item.content" />
           <p :class="$style.svgDesc" v-text="item.icon_desc" />
-          <p :class="$style.svgName" v-text="item.icon_name" />
+          <p v-if="linkType === 'unicode'" :class="$style.svgName"> {{ item.unicode | unicodeFormat }}</p>
+          <p v-else :class="$style.svgName" v-text="item.icon_name" />
 
           <div :class="$style.mask">
             <div>
@@ -187,7 +233,8 @@ import {
 } from '../apis/project'
 import {
   getLink,
-  createLink
+  createLink,
+  downloadIcons
 } from '../apis/link'
 import {
   getIcons,
@@ -206,11 +253,13 @@ export default {
   },
   data () {
     return {
+      linkType: 'Symbol',
       projects: [],
       icons: [],
       currentProjectId: '',
       recycleBin: false,
       link: '',
+      links: {},
       isLinkShow: true,
       isLinkChanged: false,
       isDownloadModalShow: false,
@@ -226,12 +275,21 @@ export default {
       iconsForm: {
         visible: 1,
         projectId: ''
-      }
+      },
+      fontFace: ''
     }
   },
   computed: {
     currentProject () {
       return this.projects.find(item => item.id === this.currentProjectId) || {}
+    },
+    currentFontFace: {
+      get: function () {
+        return this.fontFace || this.currentProject.font_face
+      },
+      set: function (val) {
+        this.fontFace = val
+      }
     }
   },
   async activated () {
@@ -287,9 +345,18 @@ export default {
     async getLink () {
       try {
         const { result = {} } = await getLink(this.currentProjectId)
-        this.link = result.link || ''
+        this.links = result || {}
+        this.changeLinkType()
       } catch (e) {
         throw e
+      }
+    },
+    changeLinkType () {
+      if (this.linkType === 'Symbol') {
+        this.link = this.links.symbolUrl
+      }
+      if (this.linkType === 'Font Class' || this.linkType === 'unicode') {
+        this.link = this.links.fontClassUrl
       }
     },
     async createLink () {
@@ -318,6 +385,15 @@ export default {
       } catch (e) {
         throw e
       }
+    },
+    async setFontFace () {
+      await this.$confirm('修改成功后，请更换图标链接')
+      await updateProject(this.currentProject.id, {
+        name: this.currentProject.name,
+        fontFace: this.fontFace || this.currentProject.font_face
+      })
+      await this.createLink()
+      this.$success('修改成功')
     },
     async editProject (item) {
       let name = ''
@@ -512,16 +588,33 @@ export default {
       this.currentDownloadSvg = {}
     },
     copyCode (item) {
-      this.$copyText(item.icon_name)
-        .then(val => {
-          this.$success('复制成功')
-        }).catch(e => {
-          this.$error(`复制成功失败，请手动复制`)
-        })
+      if (this.linkType === 'unicode') {
+        this.$copyText('&#x' + item.unicode.toString(16) + ';')
+          .then(val => {
+            this.$success('复制成功')
+          }).catch(e => {
+            this.$error(`复制成功失败，请手动复制`)
+          })
+      } else {
+        this.$copyText(item.icon_name)
+          .then(val => {
+            this.$success('复制成功')
+          }).catch(e => {
+            this.$error(`复制成功失败，请手动复制`)
+          })
+      }
     },
     recycleBinOnChange (val) {
       this.iconsForm.visible = val ? 0 : 1
       this.getIcons()
+    },
+    // 下载图标文件
+    async downloadIcons () {
+      const blob = await downloadIcons(this.links.dir_key)
+      const a = document.createElement('a')
+      a.href = window.URL.createObjectURL(blob)
+      a.download = `${this.links.dir_key}.zip`
+      a.click()
     }
   },
   async beforeRouteUpdate (to, from, next) {

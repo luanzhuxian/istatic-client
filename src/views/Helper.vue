@@ -31,7 +31,4 @@ export default {
   .helper {
     font-size: 14px;
   }
-  .wrap {
-    padding: 24px 0;
-  }
 </style>
