@@ -8,7 +8,7 @@ const routes = [
     name: 'Home',
     component: () => import('../views/Home.vue'),
     meta: {
-      title: '雅集图标管理系统'
+      title: '图标管理系统'
     }
   },
   {
