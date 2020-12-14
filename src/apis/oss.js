@@ -15,10 +15,12 @@ export const uploadFiles = (dir, data) => fetch.post(`/api/file?dir=${dir}`, dat
 
 /**
  * 创建目录
- * @param dirname {string}
+ * @param dirname {string} 新目录名
  * @param path {string}
  * @return {Promise<*>}
  */
 export const createDir = (dirname, path) => fetch.post(`/api/create/dir/${dirname}?path=${path}`)
 
-export const removeFile = (fileName) => fetch.delete(`/api/file/${fileName}`)
+export const removeFile = (path) => fetch.delete(`/api/file/${path}`)
+
+export const removeDir = (path) => fetch.delete(`/api/destroy/dir/${path}`)

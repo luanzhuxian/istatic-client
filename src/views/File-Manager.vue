@@ -29,6 +29,15 @@
             {{ item + (i === dir.split('/').length - 2 ? '' : '/') }}
           </el-button>
         </template>
+        <el-button
+            v-if="dir"
+            :class="$style.removeDir"
+            size="middle"
+            type="text"
+            @click="removeDir"
+        >
+        删除文件夹
+        </el-button>
       </div>
       <div :class="$style.dirList">
         <div
@@ -57,7 +66,14 @@
             :key="i"
           >
             <i v-if="!item.url.match(/jpg|png|gif|jpeg|bmp/i)" class="el-icon-document" />
-            <img v-else v-viewer="{ url: 'data-big' }" :data-big="item.url" :src="item.url + '?x-oss-process=style/thum-mini'" @load="imgOnload" alt="">
+            <img
+                v-else
+                v-viewer="{ url: 'data-big' }"
+                :data-big="item.url"
+                :src="item.url + '?x-oss-process=style/thum-mini'"
+                alt=""
+                @load="imgOnload"
+            >
             <a :class="$style.filename" v-text="item.name" @click="preview(item)" />
             <span :class="$style.size">{{(item.size / 1024).toFixed(4)}}KB</span>
             <span :class="$style.datetime">{{item.lastModified}}</span>
@@ -79,7 +95,7 @@
 <script>
 /* eslint-disable */
 import FilePreview from '../components/File-Preview.vue'
-import { getFiles, uploadFiles, createDir, removeFile } from '../apis/oss'
+import { getFiles, uploadFiles, createDir, removeFile, removeDir } from '../apis/oss'
 export default {
   name: 'FileManager',
   components: {
@@ -101,7 +117,7 @@ export default {
     path: {
       type: String,
       default: ''
-    },
+    }
   },
   async activated () {
     try {
@@ -144,7 +160,9 @@ export default {
 
       try {
         this.type = 'text'
-        await uploadFiles(this.dir, data)
+        const { result } = await uploadFiles(this.dir, data)
+        const { success = [] } = result
+        this.$success(`${success.length}个上传成功`)
         await this.getFiles()
       } catch (e) {
         throw e
@@ -179,6 +197,7 @@ export default {
         }
 
         await createDir(value, this.dir)
+        this.$success('创建成功')
         await this.getFiles()
       } catch (e) {
         if (e !== 'cancel') {
@@ -186,8 +205,29 @@ export default {
         }
       }
     },
+    async removeDir (item) {
+        if (!this.dir) {
+            return
+        }
+        try {
+            await this.$confirm({ title: '温馨提示', type: 'warning', message: '你确定删除吗？' })
+            await this.$confirm({ title: '温馨提示', type: 'warning', message: '你再确定一遍' })
+            await this.$confirm({ title: '温馨提示', type: 'warning', message: '删了就没有了，你再确定一下' })
+            const { result: deleted } = await removeDir(encodeURIComponent(this.dir))
+            this.$success('删除成功')
+            if (deleted.name) {           
+                const index = this.dir.split('/').indexOf(deleted.name)
+                this.clickPath(index - 1 + 1)
+            } else {
+                this.clickPath(0)
+            }
+        } catch (e) {
+            if (e) throw e
+        }
+    },
     async clickPath (index) {
       let dirArr = this.dir.split('/')
+      // 删除当前点击路径之后的子路径
       dirArr.splice(index, 100)
       this.dir = dirArr.join('/') ? dirArr.join('/') + '/' : ''
 
@@ -249,11 +289,16 @@ export default {
   .fileList {
     padding: 20px 0;
     > .path {
-      color: #598bf8;
-      margin-bottom: 10px;
-      button {
-        margin-left: 2px;
-      }
+        display: flex;
+        align-items: center;
+        color: #598bf8;
+        margin-bottom: 10px;
+        > button {
+            margin-left: 2px;
+        }
+        .removeDir {
+            margin-left: auto;
+        }
     }
   }
   .dirList {
@@ -296,12 +341,10 @@ export default {
       @include elps();
     }
     > img {
-      /*width: 80px;*/
-      /*height: 80px;*/
+      max-width: 80px;
+      max-height: 80px;
       justify-self: center;
       object-fit: cover;
-    }
-    > .size {
     }
   }
 </style>

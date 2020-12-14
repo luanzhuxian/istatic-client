@@ -18,7 +18,7 @@ fetch.interceptors.response = async resPromise => {
       return res
     }
     if (res.status !== 200) {
-      throw new Error(res.message)
+      throw new Error(res.devMessage || res.message)
     }
     return res
   } catch (e) {

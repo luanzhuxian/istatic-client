@@ -30,3 +30,18 @@ router.beforeResolve(function (to, from, next) {
   document.title = to.meta.title
   next()
 })
+// 路由导航出错时的回调
+router.onError(function (err) {
+  console.error(err)
+})
+
+// Vue.config.errorHandler = function (err, vm, info) {
+//     if (err) {
+//         if (err.name === 'ResponseError') {
+//             // 响应出错
+//             const error = JSON.parse(err.message)
+//             vm.$error(error.message)
+//         }
+//         console.error(err)
+//     }
+// }
