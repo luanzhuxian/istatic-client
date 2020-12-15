@@ -408,7 +408,10 @@ export default {
       }
 
       try {
-        const { result } = await updateProject(item.id, { name })
+        const { result } = await updateProject(item.id, {
+          name,
+          fontFace: item.font_face
+        })
         this.$success('修改成功')
 
         const index = this.projects.findIndex(pro => pro.id === item.id)
