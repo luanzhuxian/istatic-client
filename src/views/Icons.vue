@@ -525,12 +525,12 @@ export default {
     },
     async downloadFile () {
       // TODO: 为什么下载时要加命名空间 xmlns
-      // svgBolb: Blob {size: 2570, type: "image/svg+xml"}
-      const svgBolb = new Blob([this.currentDownloadSvg.content.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"')], { type: 'image/svg+xml' })
+      // svgBlob: Blob {size: 2570, type: "image/svg+xml"}
+      const svgBlob = new Blob([this.currentDownloadSvg.content.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"')], { type: 'image/svg+xml' })
 
       // createObjectURL 创建一个 DOMString
       // URL："blob:http://localhost:8001/a07f9466-1980-475b-9bfe-47dd92f16c18"
-      const URL = window.webkitURL.createObjectURL(svgBolb)
+      const URL = window.webkitURL.createObjectURL(svgBlob)
 
       // await this.$nextTick()
 
