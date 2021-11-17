@@ -2,12 +2,15 @@
 /* eslint-disable */
 import Vue from 'vue'
 import ElementUI from 'element-ui'
+
 Vue.use(ElementUI)
+
 const {
   Loading,
   MessageBox,
   Message
 } = ElementUI
+
 Vue.prototype.$loading = Loading.service
 Vue.prototype.$msgbox = MessageBox
 /*

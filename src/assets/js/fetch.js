@@ -67,19 +67,19 @@ export default class Fetch {
       url += `?${qs.stringify(config.params)}`
       delete config.params
     }
-    const req = this[CreateRequest](url, body, config)
+    const request = this[CreateRequest](url, body, config)
     try {
-      let res
+      let response
       if (this.interceptors.response) {
         // TODO:
         // 发送请求，同时将返回数据传入响应拦截器
-        res = await fetch(req)
-        res = res[config.responseType || 'json']() // res = await res.json()
-        res = await this.interceptors.response(res, config)
+        response = await fetch(request)
+        response = response[config.responseType || 'json']() // res = await res.json()
+        response = await this.interceptors.response(response, config)
       } else {
-        res = await fetch(req)
+        response = await fetch(request)
       }
-      return res
+      return response
     } catch (e) {
       throw e
     } finally {
@@ -113,7 +113,7 @@ export default class Fetch {
     delete config.headers
     Object.assign(defaultConfig, config)
 
-    // 将 body 改为 formData
+    // 处理 body
     if (defaultConfig.type === 'FormData' && body) {
       let b = new FormData()
       for (let [k, v] of Object.entries(body)) {
@@ -127,9 +127,10 @@ export default class Fetch {
     }
 
     // 生成 Headers 对象
-    defaultConfig.headers = this[CreateHeaders](defaultConfig.headers)
-    defaultConfig.signal = controller.signal
     // 替换 config 中的 headers 对象为新构建的 header 对象
+    defaultConfig.headers = this[CreateHeaders](defaultConfig.headers)
+    // signal 返回一个 AbortSignal 对象实例，它可以用来 with/abort 一个 Web 网络请求
+    defaultConfig.signal = controller.signal
     url = (defaultConfig.baseURI || '') + url
 
     // 如果超时，就终止请求，终止后，错误会在 catch 中捕获

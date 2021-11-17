@@ -15,7 +15,7 @@ fetch.interceptors.request = (url, config) => {
   return config
 }
 
-fetch.interceptors.response = async resPromise => {
+fetch.interceptors.response = async (resPromise, config) => {
   try {
     const res = await resPromise
     if (res instanceof Blob) {
