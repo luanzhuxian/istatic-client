@@ -2,6 +2,7 @@ import qs from 'qs'
 const CreateRequest = Symbol('create-req')
 const CreateHeaders = Symbol('create-headers')
 const request = Symbol('request')
+
 export default class Fetch {
   /**
    * 可选择的默认配置项，多余选项会被忽略

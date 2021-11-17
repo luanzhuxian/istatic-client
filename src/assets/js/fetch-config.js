@@ -1,16 +1,20 @@
 import Fetch from './fetch'
 import { Message, Loading } from 'element-ui'
+
 let loadingInstance = null
+
 const fetch = new Fetch({
-  timeout: 15000,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 15000
 })
+
 fetch.interceptors.request = (url, config) => {
   loadingInstance = Loading.service({ text: '拼命加载中...', background: 'transparent' })
   return config
 }
+
 fetch.interceptors.response = async resPromise => {
   try {
     const res = await resPromise
